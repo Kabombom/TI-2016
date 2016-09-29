@@ -1,0 +1,4 @@
+function histogramaOcurrencias(alfabeto)
+    
+end
+

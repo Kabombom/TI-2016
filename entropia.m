@@ -4,4 +4,7 @@ function entropia(p, A)
   %exemplo p0 = 0.5, p1=0.25, p2=0.125, p3=0.125
   %entropia =  0.5 * log2(1/0.5) + 0.25 * log2(1/0.25) + 0.125 * log2(1/0.125) + 0.125 * log2(1/0.125) = 1.75
   %FOR HELP: http://www.ebah.pt/content/ABAAAfeXAAL/codificacao-fonte-dados
+  %WARNINGS: nao esquecer que o alfabeto introduzido nao é um array normal mas sim um array de celulas
+  %          -> Exemplo: array normal: [1 2 3] array de celulas: {1 2 3}
+  %          -> Ver implementaçao do exercicio 1
 end

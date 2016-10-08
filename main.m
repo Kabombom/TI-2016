@@ -3,14 +3,15 @@ warning off
 clear, clc, close all
 
 % exercicio 1
+imagem = imread('CT1.bmp');
 som = [1 2; 3 4; 1 2; 3 4; 1 9];
-num = [1 2 3 4 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 ];
+num = [1 1 1 1 1 1 1 1 2 2 2 2 3 3 4 4];
 str = 'aeiouaeioaeiaeakas';
-alfStr = {'a' 'e' 'i' 'o' 'u'};
+alfStr = {'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'};
 alfNumSom = {1 2 3 4 5 6 7 8 9 10};
-histogramaOcurrencias(str, alfStr);
+graf = histogramaOcurrencias(num, alfNumSom);
+histogram(graf);
 
-% exercicio 2
-a = [1,2,3,1,2];
-aAlf = [1,2,3];
-entropia(a, aAlf);
+%exercicio 2
+entropia(num, alfNumSom);
+

@@ -15,3 +15,7 @@ histogram(graf);
 %exercicio 2
 entropia(num, alfNumSom);
 
+%exercicio 3
+distribuicaoEstatistica_Entropia_Imagem('Lena.bmp');
+distribuicaoEstatistica_Entropia_Imagem('CT1.bmp');
+distribuicaoEstatistica_Entropia_Imagem('Binaria.bmp');

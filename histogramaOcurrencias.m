@@ -10,15 +10,12 @@ function graf = histogramaOcurrencias(p, A)
     end
     
     %Verificar se é uma string
-    s = size(p);
-    lines = s(1);
+    [lines, collumns] = size(p);
     
     %Se for um som ou uma matriz com varias linhas e colunas
     if(lines > 1) 
-        %juntamos o canal direito à coluna do lado esquerdo
-        p = vertcat(p(:,1),p(:,2));
-        %Convertemos essa coluna numa linha
-        p = transpose(p);
+        %converter matrix numa linha apenas
+        p = reshape(p, [1, lines*collumns]);
     end
     
     %Se for uma string

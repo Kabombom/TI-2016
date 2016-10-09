@@ -11,5 +11,7 @@ function distribuicaoEstatistica_Entropia_Imagem(file)
        end
     end
     alfabeto = (1:256); % alfabeto de uma imagem
+    %graf = histogramaOcurrencias(matrizUnidimensional, alfabeto);
+    %histogram(graf);
     %entropia(matrizUnidimensional, alfabeto)
 end

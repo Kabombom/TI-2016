@@ -1,6 +1,5 @@
 function graf = histogramaOcurrencias(p, A)
     %TO IMPROVE(Se implementarem mudanças dêem update ao numero das linhas)
-    %linha 17: Concatenar todas as colunas de p
     %linha 25: Converter todos os caracteres de todas as linhas de um ficheiro de texto para inteiro (Nao sei como o matlab le ficheiros de texto, nao sei se cada linha do ficheiro de texto fica uma linha no array)
     
     %imagem

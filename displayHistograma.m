@@ -1,8 +1,8 @@
-function displayHistograma( graf )
-    if(iscategorical(graf))
-       histogram(graf); 
+function displayHistograma(p,A)
+    if(nargin==1)
+       imhist( histogramaOcurrencias(p) );
     else
-        imhist(graf);
+       histogram( histogramaOcurrencias(p,A) );
     end
 end
 

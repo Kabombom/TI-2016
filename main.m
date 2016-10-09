@@ -3,7 +3,7 @@ warning off
 clear, clc, close all
 
 % exercicio 1
-imagem = imread('CT1.bmp');
+imagem = imread('data/CT1.bmp');
 som = [1 2; 3 4; 1 2; 3 4; 1 9];
 num = [1 1 1 1 1 1 1 1 2 2 2 2 3 3 4 4];
 str = 'aeiouaeioaeiaeakas';
@@ -16,7 +16,7 @@ alfNumSom = {1 2 3 4 5 6 7 8 9 10};
 %entropia(num, alfNumSom);
 
 %exercicio 3
-distribuicaoEstatistica_Entropia_Audio('saxriff.wav');
-distribuicaoEstatistica_Entropia_Imagem('Lena.bmp');
-distribuicaoEstatistica_Entropia_Imagem('CT1.bmp');
-distribuicaoEstatistica_Entropia_Imagem('Binaria.bmp');
+distribuicaoEstatistica_Entropia_Imagem('data/Lena.bmp');
+%distribuicaoEstatistica_Entropia_Imagem('data/CT1.bmp');
+%distribuicaoEstatistica_Entropia_Imagem('data/Binaria.bmp');
+%distribuicaoEstatistica_Entropia_Audio('data/saxriff.wav');

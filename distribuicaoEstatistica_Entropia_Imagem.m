@@ -11,7 +11,8 @@ function distribuicaoEstatistica_Entropia_Imagem(file)
        end
     end
     alfabeto = (1:256); % alfabeto de uma imagem
-    %graf = histogramaOcurrencias(matrizUnidimensional, alfabeto);
-    %histogram(graf);
-    %entropia(matrizUnidimensional, alfabeto)
+    alfabeto = mat2cell(alfabeto,1,ones(1,size(alfabeto,2)));
+    graf = histogramaOcurrencias(matrizUnidimensional, alfabeto);
+    histogram(graf);
+    entropia(matrizUnidimensional, alfabeto)
 end

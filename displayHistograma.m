@@ -8,7 +8,8 @@ function displayHistograma(p,A)
        histogram(graf);
     %Som
     else
-        %TO DO
+        graf = histogramaOcurrencias(p,A);
+        histogram(graf);
     end
 end
 

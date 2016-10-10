@@ -13,7 +13,19 @@ function graf = histogramaOcurrencias(p, A)
         p = reshape(p, [1, lines*collumns]);
         %converte celulas em numeros
         convA = cell2mat(A);
-        %TO DO
+
+        graf = zeros(1,lines*collumns); 
+        counter = 1;
+        maxConvA = length(convA);
+        maxP = length(p);
+        for i=1:maxConvA
+            for j=1:maxP
+                if(convA(i)==p(j))
+                   graf(counter) = p(j);
+                   counter = counter + 1;
+                end
+            end
+        end
     end
     
     %Se for uma string

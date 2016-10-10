@@ -13,9 +13,7 @@ function graf = histogramaOcurrencias(p, A)
         p = reshape(p, [1, lines*collumns]);
         %converte celulas em numeros
         convA = cell2mat(A);
-        %converte numeros em strings
-        A = cellfun(@num2str, A, 'UniformOutput', false);   
-        graf = categorical(p,convA,A);
+        %TO DO
     end
     
     %Se for uma string

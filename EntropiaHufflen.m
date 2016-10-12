@@ -3,7 +3,8 @@ function EntropiaHufflen()
     % Lena.bmp
     imagem = imread('data/Lena.bmp');
     imagem = imagem(:);
-    c = hist(imagem, 0:255);
+    c = imhist(imagem);
+    c = transpose(c);
     huf = hufflen(c);
     ent = sum((c/sum(c)) .* huf);
     s = sprintf('entropia de Lena.bmp %d\n', ent);
@@ -11,8 +12,8 @@ function EntropiaHufflen()
     
     % CT1.bmp
     imagem = imread('data/CT1.bmp');
-    imagem = imagem(:);
-    c = hist(imagem, 0:255);
+    c = imhist(imagem);
+    c = transpose(c);
     huf = hufflen(c);
     ent = sum((c/sum(c)) .* huf);
     s = sprintf('entropia de CT1.bmp %d\n', ent);
@@ -20,8 +21,8 @@ function EntropiaHufflen()
     
     % Binaria.bmp
     imagem = imread('data/Binaria.bmp');
-    imagem = imagem(:);
-    c = hist(imagem, 0:255);
+    c = imhist(imagem);
+    c = transpose(c);
     huf = hufflen(c);
     ent = sum((c/sum(c)) .* huf);
     s = sprintf('entropia de Binaria.bmp %d\n', ent);
@@ -51,9 +52,10 @@ function EntropiaHufflen()
             end
         end
     end
-    freqOcurr = hist(graf)
-    HLen = hufflen(freqOcurr);
-    ent = sum((freqOcurr/sum(freqOcurr)) .* HLen);
+    counts = histcounts(graf);
+    frequencias = counts(1,:);
+    HLen = hufflen(frequencias);
+    ent = sum((frequencias/sum(frequencias)) .* HLen);
     s = sprintf('entropia de saxriff.wav %d\n', ent);
     disp(s)
     
@@ -63,9 +65,10 @@ function EntropiaHufflen()
     texto = fscanf(ficheiro, '%c');
     fclose(ficheiro);
     graf = histogramaOcurrencias(texto , letters);
-    freqOcurr = hist(graf)
-    HLen = hufflen(freqOcurr);
-    ent = sum((freqOcurr/sum(freqOcurr)) .* HLen);
+    counts = histcounts(graf);
+    frequencias = counts(1,:);
+    HLen = hufflen(frequencias);
+    ent = sum((frequencias/sum(frequencias)) .* HLen);
     s = sprintf('entropia de Texto.txt %d\n', ent);
     disp(s)
     

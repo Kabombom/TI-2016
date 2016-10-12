@@ -7,7 +7,6 @@ function ent = entropia(p, A)
       frequencias = imhist(p);
       frequencias = transpose(frequencias);
   else
-      %Obtenho o objecto do tipo categorical
       graf = histogramaOcurrencias(p, A);
       %obter frequencias
       counts = histcounts(graf);

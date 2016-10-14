@@ -9,11 +9,11 @@ num = [1 1 1 1 1 1 1 1 2 2 2 2 3 3 4 4];
 str = 'aeiouaeioaeiaeakas';
 alfStr = {'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'};
 alfNumSom = {1 2 3 4 5 6 7 8 9 10};
-%displayHistograma(imagem);
+% displayHistograma(num,alfNumSom);
 
 
 %exercicio 2
-%entropia(num, alfNumSom); ->ver como chamar funcao
+% disp(sprintf('entropia: %d', entropia(num, alfNumSom)));
 
 %exercicio 3
 % distribuicaoEstatistica_Entropia('data/saxriff.wav');
@@ -23,6 +23,6 @@ alfNumSom = {1 2 3 4 5 6 7 8 9 10};
 % distribuicaoEstatistica_Entropia('data/Texto.txt');
 
 %exercicio 4
-EntropiaHufflen();
+% EntropiaHufflen();
 
 

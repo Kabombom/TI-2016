@@ -3,30 +3,27 @@ function EntropiaHufflen()
     % Lena.bmp
     imagem = imread('data/Lena.bmp');
     imagem = imagem(:);
-    c = imhist(imagem);
-    c = transpose(c);
-    huf = hufflen(c);
-    ent = sum((c/sum(c)) .* huf);
-    s = sprintf('entropia de Lena.bmp %d\n', ent);
-    disp(s);
+    hist = imhist(imagem);
+    hist = transpose(hist);
+    huf = hufflen(hist);
+    ent = sum((hist/sum(hist)) .* huf);
+    fprintf('entropia de Lena.bmp %d\n', ent);
     
     % CT1.bmp
     imagem = imread('data/CT1.bmp');
-    c = imhist(imagem);
-    c = transpose(c);
-    huf = hufflen(c);
-    ent = sum((c/sum(c)) .* huf);
-    s = sprintf('entropia de CT1.bmp %d\n', ent);
-    disp(s);
+    hist = imhist(imagem);
+    hist = transpose(hist);
+    huf = hufflen(hist);
+    ent = sum((hist/sum(hist)) .* huf);
+    fprintf('entropia de CT1.bmp %d\n', ent);
     
     % Binaria.bmp
     imagem = imread('data/Binaria.bmp');
-    c = imhist(imagem);
-    c = transpose(c);
-    huf = hufflen(c);
-    ent = sum((c/sum(c)) .* huf);
-    s = sprintf('entropia de Binaria.bmp %d\n', ent);
-    disp(s);
+    hist = imhist(imagem);
+    hist = transpose(hist);
+    huf = hufflen(hist);
+    ent = sum((hist/sum(hist)) .* huf);
+    fprintf('entropia de Binaria.bmp %d\n', ent);
     
     % saxriff.wav
     [som, freq, nBits ] = getSoundData('data/saxriff.wav');
@@ -38,7 +35,6 @@ function EntropiaHufflen()
         som = reshape(som, [1, lines*collumns]);
         %converte celulas em numeros
         convA = cell2mat(alf);
-
         graf = zeros(1,lines*collumns); 
         counter = 1;
         maxConvA = length(convA);
@@ -56,8 +52,7 @@ function EntropiaHufflen()
     frequencias = counts(1,:);
     HLen = hufflen(frequencias);
     ent = sum((frequencias/sum(frequencias)) .* HLen);
-    s = sprintf('entropia de saxriff.wav %d\n', ent);
-    disp(s)
+    fprintf('entropia de saxriff.wav %d\n', ent);
     
     % Texto.txt
     letters = {'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'};
@@ -69,7 +64,6 @@ function EntropiaHufflen()
     frequencias = counts(1,:);
     HLen = hufflen(frequencias);
     ent = sum((frequencias/sum(frequencias)) .* HLen);
-    s = sprintf('entropia de Texto.txt %d\n', ent);
-    disp(s)
+    fprintf('entropia de Texto.txt %d\n', ent);
     
 end

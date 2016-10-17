@@ -1,9 +1,9 @@
-% exercicio 6b)
+% exercicio 6b
 [ som, freq, nBits ] = getSoundData('data/guitarSolo.wav');
 [ somTarget01, freqTarget01, nBitsTarget01 ] = getSoundData('data/repeat.wav');
 [ somTarget02, freqTarget02, nBitsTarget02 ] = getSoundData('data/repeatNoise.wav');
 
-som = som(:);
+som = som(:); % utilizar apenas o um canal
 somTarget01 = somTarget01(:);
 somTarget02 = somTarget02(:);
 som = som * 2^nBits;

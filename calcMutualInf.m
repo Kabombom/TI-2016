@@ -1,7 +1,7 @@
 function info = calcMutualInf(x, y, alf)
     
     matrix = zeros(length(alf));
-    a = - min(min(x), min(y)) + 1;
+    a = floor(- min(min(x), min(y)) + 1);
 
     for i=1:length(x)
         matrix(x(i) + a, y(i) + a) = matrix(x(i) + a, y(i) + a) + 1;

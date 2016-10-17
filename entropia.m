@@ -21,4 +21,5 @@ function ent = entropia(p, A)
   preSum(isnan(preSum)) = 0;
   %Somatorio para calcular a entropia
   ent = sum(preSum);
+  
 end

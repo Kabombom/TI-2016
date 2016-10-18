@@ -1,4 +1,4 @@
-function distribuicaoEstatistica_Entropia(filename)
+function distribuicaoEstatisticaEntropia(filename)
 
     [path,name,ext] = fileparts(filename);
     

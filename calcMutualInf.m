@@ -1,4 +1,4 @@
-function info = calcMutualInf(x, y, alf)
+function [info] = calcMutualInf(x, y, alf)
     
     matrix = zeros(length(alf));
     a = floor(- min(min(x), min(y)) + 1);
@@ -16,14 +16,16 @@ function info = calcMutualInf(x, y, alf)
     probXY = matrix ./ sumElements; 
     
     probX = nonzeros(probX);
-    entX = -sum(probX .* log2(probX));
+    [entX] = -sum(probX .* log2(probX));
     
     probY = nonzeros(probY);
-    entY = -sum(probY .* log2(probY));
+    [entY] = -sum(probY .* log2(probY));
     
     probXY = nonzeros(probXY);
-    entXY = -sum(probXY .* log2(probXY));
-
+    [entXY] = -sum(probXY .* log2(probXY));
+    
+    % I(X,Y) = H(X) + H(Y) + H(X,Y)
     info = entX + entY - entXY;
+  
     
 end

@@ -1,6 +1,6 @@
 % exercicio 3
-distribuicaoEstatistica_Entropia('data/saxriff.wav');
-distribuicaoEstatistica_Entropia('data/Lena.bmp');
-distribuicaoEstatistica_Entropia('data/CT1.bmp');
-distribuicaoEstatistica_Entropia('data/Binaria.bmp');
-distribuicaoEstatistica_Entropia('data/Texto.txt');
+distribuicaoEstatisticaEntropia('data/saxriff.wav');
+distribuicaoEstatisticaEntropia('data/Lena.bmp');
+distribuicaoEstatisticaEntropia('data/CT1.bmp');
+distribuicaoEstatisticaEntropia('data/Binaria.bmp');
+distribuicaoEstatisticaEntropia('data/Texto.txt');

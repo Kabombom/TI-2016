@@ -4,18 +4,21 @@ function agrupamentoSimbolos(filename)
     
     % imagem
     if(strcmp(ext,'.bmp'))
+        disp('A processar imagem');
         obj = imread(filename);
         alf = num2cell(0:255);
     
     % som
     elseif(strcmp(ext,'.wav'))
+        disp('A processar som');
         [obj, freq, nBits ] = getSoundData(filename);
         d = 1/(2^nBits);
         alf = num2cell(-1:d:1);
         
     % texto
     else
-        ficheiro = fopen('data/Texto.txt', 'r');
+        disp('A processar ficheiro de texto');
+        ficheiro = fopen(filename, 'r');
         obj = fscanf(ficheiro,'%c');
         fclose(ficheiro);       
         alf = {'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'};
@@ -32,7 +35,7 @@ function agrupamentoSimbolos(filename)
     alf = labelAlf(alf);
     set(gca, 'XTickLabel', []);  % retira os valores do label x
     displayHistograma(obj,alf);
-    fprintf('entropia de %s: %f\n', filename, entropia(obj, alf));
+    fprintf('entropia de %s: %f\n', name, entropia(obj, alf));
 
 end
 

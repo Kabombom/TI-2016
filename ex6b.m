@@ -3,7 +3,7 @@
 [ somTarget01, freqTarget01, nBitsTarget01 ] = getSoundData('data/repeat.wav');
 [ somTarget02, freqTarget02, nBitsTarget02 ] = getSoundData('data/repeatNoise.wav');
 
-som = som(:); % utilizar apenas o um canal
+som = som(:);
 somTarget01 = somTarget01(:);
 somTarget02 = somTarget02(:);
 som = som * 2^nBits;

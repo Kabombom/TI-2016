@@ -4,7 +4,7 @@ function graf = histogramaOcurrencias(p, A)
     if(nargin==1)
        	graf = p;
         
-    % string
+    % texto
     elseif(ischar(p))
         % converter letras para inteiros
         p = uint16(p);
@@ -27,7 +27,7 @@ function graf = histogramaOcurrencias(p, A)
         maxConvA = length(convA);
         maxP = length(p);
         for i=1:maxConvA
-            fprintf('%f %% processedo - A filtar fonte\n', (i/maxConvA)*100);
+            % fprintf('%f %% processedo - A filtar fonte\n', (i/maxConvA)*100);
             for j=1:maxP
                 if(convA(i)==p(j))
                    graf(counter) = p(j);
@@ -37,5 +37,4 @@ function graf = histogramaOcurrencias(p, A)
         end
     end
     
-
 end

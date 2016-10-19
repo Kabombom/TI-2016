@@ -7,7 +7,7 @@ function EntropiaHufflen()
     hist = transpose(hist);
     huf = hufflen(hist);
     ent = sum((hist/sum(hist)) .* huf);
-    fprintf('entropia de Lena.bmp %d\n', ent);
+    fprintf('entropia de Lena.bmp: %f\n', ent);
     
     % CT1.bmp
     imagem = imread('data/CT1.bmp');
@@ -15,7 +15,7 @@ function EntropiaHufflen()
     hist = transpose(hist);
     huf = hufflen(hist);
     ent = sum((hist/sum(hist)) .* huf);
-    fprintf('entropia de CT1.bmp %d\n', ent);
+    fprintf('entropia de CT1.bmp: %f\n', ent);
     
     % Binaria.bmp
     imagem = imread('data/Binaria.bmp');
@@ -23,7 +23,7 @@ function EntropiaHufflen()
     hist = transpose(hist);
     huf = hufflen(hist);
     ent = sum((hist/sum(hist)) .* huf);
-    fprintf('entropia de Binaria.bmp %d\n', ent);
+    fprintf('entropia de Binaria.bmp: %f\n', ent);
     
     % saxriff.wav
     [som, freq, nBits ] = getSoundData('data/saxriff.wav');
@@ -52,7 +52,7 @@ function EntropiaHufflen()
     frequencias = counts(1,:);
     HLen = hufflen(frequencias);
     ent = sum((frequencias/sum(frequencias)) .* HLen);
-    fprintf('entropia de saxriff.wav %d\n', ent);
+    fprintf('entropia de saxriff.wav: %f\n', ent);
     
     % Texto.txt
     letters = {'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'};
@@ -64,6 +64,6 @@ function EntropiaHufflen()
     frequencias = counts(1,:);
     HLen = hufflen(frequencias);
     ent = sum((frequencias/sum(frequencias)) .* HLen);
-    fprintf('entropia de Texto.txt %d\n', ent);
+    fprintf('entropia de Texto.txt: %f\n', ent);
     
 end

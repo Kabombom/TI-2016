@@ -5,21 +5,21 @@ function ent = entropia(p, A)
       frequencias = transpose(frequencias);
   else
       graf = histogramaOcurrencias(p, A);
-      %obter frequencias
+      % obter frequencias
       counts = histcounts(graf);
       frequencias = counts(1,:);
   end
   
   aux = size(p);
-  %numero de elementos em p
+  % numero de elementos em p
   numElementos = aux(1) * aux(2);
-  %calculo a probabilidade de cada elemento de ocorrer
+  % probabilidade de cada elemento de ocorrer
   probs = arrayfun(@(x) x./numElementos, frequencias);
-  %Uso a formula mas sem fazer somatorio
+  % formula sem fazer somatorio
   preSum = arrayfun(@(x) x .* log2(1./x), probs);
-  %Torno todos os elementos do tipo Nan em 0, se nao o fizer a sum vai dar Nan
+  % tornar todos os elementos do tipo Nan em 0, caso contrario a soma daria Nan
   preSum(isnan(preSum)) = 0;
-  %Somatorio para calcular a entropia
+  % somatorio para calcular a entropia
   ent = sum(preSum);
   
 end

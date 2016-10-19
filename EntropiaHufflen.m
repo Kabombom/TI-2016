@@ -31,9 +31,9 @@ function EntropiaHufflen()
     alf = num2cell(-1:d:1);
     [lines, collumns] = size(som);
     if(lines > 1) 
-        %converter matrix numa linha apenas
+        % converter matriz numa linha apenas
         som = reshape(som, [1, lines*collumns]);
-        %converte celulas em numeros
+        % converter celulas em numeros
         convA = cell2mat(alf);
         graf = zeros(1,lines*collumns); 
         counter = 1;

@@ -11,6 +11,5 @@ function info = informacaoMutua(query, target, alf, step)
         info(ceil(i / step)) = calcMutualInf(query, partTarget, alf);
     end
     
-    
 end
 

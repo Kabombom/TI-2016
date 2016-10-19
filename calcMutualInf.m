@@ -26,6 +26,5 @@ function [info] = calcMutualInf(x, y, alf)
     
     % I(X,Y) = H(X) + H(Y) + H(X,Y)
     info = entX + entY - entXY;
-  
-    
+      
 end

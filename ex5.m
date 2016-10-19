@@ -1,9 +1,9 @@
 % exercicio 5
-%Imagem
+% Imagem
 %obj = imread('data/Lena.bmp');
 %alf = num2cell(0:255);
 
-%Ficheiro de texto
+% Ficheiro de texto
 % ficheiro = fopen('data/Texto.txt', 'r');
 % obj = fscanf(ficheiro,'%c');
 % fclose(ficheiro);       
@@ -12,12 +12,12 @@
 % alf = cellfun(@uint16, alf);
 % alf = num2cell(alf);
 
-%Som - Nao recomendado, processo lento
+% Som - Nao recomendado, processo lento
 % [obj, freq, nBits ] = getSoundData('data/saxriff.wav');
 % d = 1/(2^nBits);
 % alf = num2cell(-1:d:1);
 
-%vetor de inteiros
+% vetor de inteiros
 obj = [2 4 1 0 2 0 1 6];
 alf = num2cell(0:10);
 
@@ -30,4 +30,4 @@ alf = labelAlf(alf);
 
 displayHistograma(obj, alf);
 set(gca, 'XTickLabel', []);
-disp(sprintf('entropia: %f', entropia(obj, alf)));
+fprintf('entropia: %f', entropia(obj, alf));

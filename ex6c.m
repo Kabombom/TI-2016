@@ -1,5 +1,4 @@
 % exercicio 6c
-
 [ som, freq, nBits ] = getSoundData('data/guitarSolo.wav');
 som = som(:);
 som = som * 2^nBits;

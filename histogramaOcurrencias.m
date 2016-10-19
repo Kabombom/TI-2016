@@ -1,22 +1,25 @@
-function graf = histogramaOcurrencias(p, A)    
-    %imagem
+function graf = histogramaOcurrencias(p, A)  
+
+    % imagem
     if(nargin==1)
        	graf = p;
-    %Se for uma string
+        
+    % string
     elseif(ischar(p))
-        %converter letras para inteiros
+        % converter letras para inteiros
         p = uint16(p);
-        %converter alfabeto para inteiros
+        % converter alfabeto para inteiros
         convA = cellfun(@uint16, A); 
-        %Associa letras em A aos seu ASCCI code em convA
+        % associa letras em A aos seu ASCCI code em convA
         graf = categorical(p,convA,A);
-    %Se for um som
+        
+    % som
     else
         [lines, collumns] = size(p);
     
-        %converter matrix numa linha apenas
+        % converte matriz numa linha apenas
         p = reshape(p, [1, lines*collumns]);
-        %converte celulas em numeros
+        % converte celulas em numeros
         convA = cell2mat(A);
 
         graf = zeros(1,lines*collumns); 
@@ -24,7 +27,7 @@ function graf = histogramaOcurrencias(p, A)
         maxConvA = length(convA);
         maxP = length(p);
         for i=1:maxConvA
-            disp(sprintf('%f %% processedo - A filtar fonte\n', (i/maxConvA)*100));
+            fprintf('%f %% processedo - A filtar fonte\n', (i/maxConvA)*100);
             for j=1:maxP
                 if(convA(i)==p(j))
                    graf(counter) = p(j);

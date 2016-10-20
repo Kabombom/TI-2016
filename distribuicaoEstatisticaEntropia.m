@@ -18,7 +18,8 @@ function distribuicaoEstatisticaEntropia(filename)
         
     % texto
     else
-        alf = {'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'};
+        alf = cellstr((horzcat('a':'z','A':'Z'))');
+        alf = alf';
         ficheiro = fopen(filename, 'r');
         texto = fscanf(ficheiro,'%c');
         fclose(ficheiro);

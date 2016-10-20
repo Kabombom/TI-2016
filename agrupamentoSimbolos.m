@@ -20,8 +20,9 @@ function agrupamentoSimbolos(filename)
         disp('A processar ficheiro de texto');
         ficheiro = fopen(filename, 'r');
         obj = fscanf(ficheiro,'%c');
-        fclose(ficheiro);       
-        alf = {'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'};
+        fclose(ficheiro);
+        alf = cellstr((horzcat('a':'z','A':'Z'))');
+        alf = alf';
         obj = uint16(obj);
         alf = cellfun(@uint16, alf);
         alf = num2cell(alf);

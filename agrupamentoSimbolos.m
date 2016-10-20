@@ -30,11 +30,11 @@ function agrupamentoSimbolos(filename)
     
     alf = criarAlfabetoDePares(alf);
     [lines, collumns] = size(obj);
-    obj = reshape(obj, [1, lines*collumns]);
+    obj = obj(:);
     obj = vec2mat(obj, 2);
     obj = labelObj(alf,obj);
     alf = labelAlf(alf);
-    set(gca, 'XTickLabel', []);  % retira os valores do label x
+    % set(gca, 'XTickLabel', []);  % retira os valores do label x
     displayHistograma(obj,alf);
     fprintf('entropia de %s: %f\n', name, entropia(obj, alf));
 

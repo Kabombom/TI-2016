@@ -25,14 +25,14 @@ function graf = histogramaOcurrencias(p, A)
         maxConvA = length(convA);
         maxP = length(p);
         for i=1:maxConvA
- -            % fprintf('%f %% processedo - A filtar fonte\n', (i/maxConvA)*100);
- -            for j=1:maxP
- -                if(convA(i)==p(j))
- -                   graf(counter) = p(j);
- -                   counter = counter + 1;
- -                end
- -            end
- -        end
+             % fprintf('%f %% processedo - A filtar fonte\n', (i/maxConvA)*100);
+             for j=1:maxP
+                 if(convA(i)==p(j))
+                    graf(counter) = p(j);
+                    counter = counter + 1;
+                 end
+             end
+         end
     end
     
 end

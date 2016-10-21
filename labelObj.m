@@ -4,7 +4,7 @@ function out = labelObj(alf,obj)
     len = length(obj);
     out = zeros(len,1);
     for i = 1:len
-       fprintf('%f %% processedo - A processar fonte\n', (i/len)*100);
+       fprintf('%f %% processado - A processar fonte\n', (i/len)*100);
        obj1 = obj(i,1);
        obj2 = obj(i,2);
        for j = 1:length(alf)
@@ -18,9 +18,9 @@ function out = labelObj(alf,obj)
        end
     end
     out = transpose(out);
-    %Remover zeros do vector
+    % Remover zeros do vector
     out = out(out~=0);
-    % fprintf('Object processed\n');
+    fprintf('Object processed\n');
     
 end
 

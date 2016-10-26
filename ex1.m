@@ -1,5 +1,5 @@
 % exercicio 1
 str = 'aeiouaeioaeiaeakas';
 alf = cellstr((horzcat('a':'z','A':'Z'))');
-alf = alf';
+alfStr = alf';
 displayHistograma(str, alfStr);

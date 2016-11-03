@@ -2,7 +2,7 @@ import java.awt.*;
 import javax.imageio.ImageIO;
 import java.io.*;
 
-//classe para ler uma imagem e preparar a codificacao no formato GIF
+// Classe para ler uma imagem e preparar a codificacao no formato GIF
 public class MyGIF {
 	static short width, height;
 	static byte [] r, g, b;
@@ -16,19 +16,19 @@ public class MyGIF {
 		}*/
 				
 		try {
-			//---Carregar uma imagem
+			// Carregar uma imagem
 			String imName = "monica.png"; //args[0];
 			Image image = ImageIO.read(new File(imName));
 			
-			//---Codificar a imagem como GIF		
+			// Codificar a imagem como GIF
 			MyGIFEncoder encoder = new MyGIFEncoder(image);
 		
-			//---Escrever no ficheiro
+			// Escrever no ficheiro
 			String gifName = "output.gif"; //args[1];
 			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(gifName));		
 			
 			////////////////////////////////////////////////////////
-			encoder.write(output);			//---> COMPLETAR ESTA FUNcaO
+			encoder.write(output); // COMPLETAR ESTA FUNCAO
 			////////////////////////////////////////////////////////				
 		}
 		catch(IOException e) {

@@ -17,7 +17,7 @@ public class MyGIF {
 				
 		try {
 			// Carregar uma imagem
-			String imName = "monica.png"; //args[0];
+			String imName = "./resources/monica.png"; //args[0];
 			Image image = ImageIO.read(new File(imName));
 			
 			// Codificar a imagem como GIF

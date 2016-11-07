@@ -26,10 +26,8 @@ public class MyGIF {
 			// Escrever no ficheiro
 			String gifName = "output.gif"; //args[1];
 			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(gifName));		
-			
-			////////////////////////////////////////////////////////
+
 			encoder.write(output); // COMPLETAR ESTA FUNCAO
-			////////////////////////////////////////////////////////				
 		}
 		catch(IOException e) {
 			System.out.println("Erro no acesso ao ficheiro (input)");

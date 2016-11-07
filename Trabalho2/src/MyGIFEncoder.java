@@ -7,9 +7,9 @@ public class MyGIFEncoder {
 	int numColors; // numero de cores distintas na imagem
 	byte pixels[]; // array com os indices de cores, i.e., array com a imagem indexada
 	byte colors[]; // array 3 vezes maior que o anterior com os niveis RGB da imagem
-	// associados a cada indice (cores a escrever na Global Color Table)
-	byte [][] r, g, b; //matrizes com os valores R,G e B em cada celula da imagem
-	byte minCodeSize; //tamanho minimo dos codigos LZW
+    // associados a cada indice (cores a escrever na Global Color Table)
+	byte [][] r, g, b; // matrizes com os valores R,G e B em cada celula da imagem
+	byte minCodeSize; // tamanho minimo dos codigos LZW
 
 
 	// Construtor e funcoes auxiliares (para obtencao da imagem indexada)
@@ -17,19 +17,19 @@ public class MyGIFEncoder {
 		width = (short)image.getWidth(null);
 		height = (short)image.getHeight(null);
 
-		// definir a imagem indexada
+		// Definir a imagem indexada
 		getIndexedImage(image);
 	}
 
 
 	// Conversao de um objecto do tipo Image numa imagem indexada
 	private void getIndexedImage(Image image) throws InterruptedException, AWTException {
-		// matriz values: cada entrada conter� um inteiro com 4 conjuntos de 8 bits,
+		// Matriz values: cada entrada contem um inteiro com 4 conjuntos de 8 bits,
 		// pela seguinte ordem: alpha, red, green, blue
-		// obtidos com recurso ao metodo grabPixels da classe PixelGrabber
+		// obtidos com o metodo grabPixels da classe PixelGrabber
 		int values[] = new int[width * height];
 		PixelGrabber grabber = new PixelGrabber(image, 0, 0, width, height, values, 0, width);
-		grabber.grabPixels();
+        grabber.grabPixels();
 
 		// Obter imagem RGB
 		getRGB(values);
@@ -134,24 +134,21 @@ public class MyGIFEncoder {
 		return nb;
 	}
 
+
 	// Funcao para escrever imagem no formato GIF, versao 87a
 	// COMPLETAR ESTA FUNCAO
 	public void write(OutputStream output) throws IOException {
 		// Escrever cabecalho do GIF
 		writeGIFHeader(output);
 
-		// Escrever cabecalho do Image Block
+		// Escrever cabecalho do Image Block -> Img Block Header + min code size
 		writeImageBlockHeader(output);
 
-		/////////////////////////////////////////
-		// Escrever blocos com 256 bytes no maximo
-		/////////////////////////////////////////
-		// CODIFICADOR LZW AQUI !!!!
-		// Escrever blocos comprimidos, com base na matriz pixels e no minCodeSize;
-		// O primeiro bloco tem, depois do block size, o clear code
-		// Escrever end of information depois de todos os blocos
-		// Escrever block terminator (0x00)
+        codificadorLZW(output);
 
+        // Escrever block terminator (0x00)
+        char terminator = 0x00;
+        output.write(terminator);
 
 		// Trailer
 		byte trailer = 0x3b;
@@ -160,6 +157,15 @@ public class MyGIFEncoder {
 		// Flush do ficheiro (BufferedOutputStream utilizado)
 		output.flush();
 	}
+
+	private void codificadorLZW(OutputStream output) {
+        // Escrever blocos com 256 bytes no maximo
+        // CODIFICADOR LZW AQUI !!!!
+        // Escrever blocos comprimidos, com base na matriz pixels e no minCodeSize;
+        // O primeiro bloco tem, depois do block size, o clear code
+        // Escrever end of information depois de todos os blocos
+    }
+
 
 	// Gravar cabecalho do GIF (ate global color table)
 	private void writeGIFHeader(OutputStream output) throws IOException {
@@ -170,7 +176,7 @@ public class MyGIFEncoder {
 			output.write((byte) (s.charAt(i)));
 		}
 
-		// Ecra logico (igual a da dimensao da imagem) --> primeiro o LSB e depois o MSB
+		// Ecra logico (igual a da dimensao da imagem) -> primeiro o LSB e depois o MSB
 		output.write((byte)(width & 0xFF));
 		output.write((byte)((width >> 8) & 0xFF));
 		output.write((byte)(height & 0xFF));
@@ -179,9 +185,9 @@ public class MyGIFEncoder {
 		// GCTF, Color Res, SF, size of GCT
 		byte toWrite, GCTF, colorRes, SF, sz;
 		GCTF = 1;
-		colorRes = 7;  // numero de bits por cor primaria (-1)
+		colorRes = 7;  // Numero de bits por cor primaria (-1)
 		SF = 0;
-		sz = (byte) (numBits(numColors - 1) - 1); //-1: 0 --> 2^1, 7 --> 2^8
+		sz = (byte) (numBits(numColors - 1) - 1); //-1: 0 -> 2^1, 7 -> 2^8
 		toWrite = (byte) (GCTF << 7 | colorRes << 4 | SF << 3 | sz);
 		output.write(toWrite);
 
@@ -190,12 +196,13 @@ public class MyGIFEncoder {
 		output.write(bgci);
 
 		// Pixel aspect ratio
-		byte par = 0; // 0 --> informacao sobre aspect ratio nao fornecida --> decoder usa valores por omissao
+		byte par = 0; // 0 -> informacao sobre aspect ratio nao fornecida -> decoder usa valores por omissao
 		output.write(par);
 
 		// Global color table
 		output.write(colors, 0, colors.length);
 	}
+
 
 	// Gravar cabecalho do Image Block (LZW minimum code size)
 	private void writeImageBlockHeader(OutputStream output) throws IOException {
@@ -227,7 +234,7 @@ public class MyGIFEncoder {
 
 		// LZW Minimum Code Size (com base no numero de cores utilizadas)
 		minCodeSize = (byte)(numBits(numColors - 1));
-		if (minCodeSize == 1) {  // imagens binarias --> caso especial (pag. 26 do RFC)
+		if (minCodeSize == 1) {  // Imagens binarias -> caso especial (pag. 26 do RFC)
 			minCodeSize++;
 		}
 

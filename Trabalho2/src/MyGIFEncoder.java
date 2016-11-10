@@ -1,6 +1,11 @@
 import java.io.*;
 import java.awt.*;
 import java.awt.image.*;
+import java.util.Hashtable;
+
+// Para o LZW
+// Colors e o alfabeto
+// Pixesl a mensagem
 
 public class MyGIFEncoder {
 	short width, height; // largura e altura da imagem
@@ -10,12 +15,14 @@ public class MyGIFEncoder {
 	// associados a cada indice (cores a escrever na Global Color Table)
 	byte [][] r, g, b; //matrizes com os valores R,G e B em cada celula da imagem
 	byte minCodeSize; //tamanho minimo dos codigos LZW
+    Hashtable<Integer, Integer> codificationTable; //HashTable for LZW algorithm
 
 
 	// Construtor e funcoes auxiliares (para obtencao da imagem indexada)
 	public MyGIFEncoder(Image image) throws InterruptedException, AWTException {
 		width = (short)image.getWidth(null);
 		height = (short)image.getHeight(null);
+        codificationTable = new Hashtable<Integer, Integer>();
 
 		// definir a imagem indexada
 		getIndexedImage(image);
@@ -132,6 +139,23 @@ public class MyGIFEncoder {
 		}
 
 		return nb;
+	}
+
+	private void generateInitialEntriesForLzw() {
+        for (int i = 0; i < colors.length; i++) {
+            codificationTable.put(i+1, (int) colors[i]);
+        }
+    }
+
+	public void lzwCodification() {
+        generateInitialEntriesForLzw();
+        int currentInputCharacter = (int)pixels[0];
+
+        for (int i = 1; i < pixels.length; i++) {
+            currentInputCharacter = currentInputCharacter << 8;
+            int sequence = currentInputCharacter + (int)pixels[i];
+
+        }
 	}
 
 	// Funcao para escrever imagem no formato GIF, versao 87a

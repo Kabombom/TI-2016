@@ -2,6 +2,7 @@ import java.io.*;
 import java.awt.*;
 import java.awt.image.*;
 import java.util.Hashtable;
+import java.util.Enumeration;
 
 // Para o LZW
 // Colors e o alfabeto
@@ -12,23 +13,21 @@ public class MyGIFEncoder {
 	int numColors; // numero de cores distintas na imagem
 	byte pixels[]; // array com os indices de cores, i.e., array com a imagem indexada
 	byte colors[]; // array 3 vezes maior que o anterior com os niveis RGB da imagem
-    // associados a cada indice (cores a escrever na Global Color Table)
+  // associados a cada indice (cores a escrever na Global Color Table)
 	byte [][] r, g, b; // matrizes com os valores R,G e B em cada celula da imagem
 	byte minCodeSize; // tamanho minimo dos codigos LZW
 	// associados a cada indice (cores a escrever na Global Color Table)
-    Hashtable<Integer, Integer> codificationTable; //HashTable for LZW algorithm
-
+  Hashtable<Integer, String> codificationTable; //HashTable for LZW algorithm
 
 	// Construtor e funcoes auxiliares (para obtencao da imagem indexada)
 	public MyGIFEncoder(Image image) throws InterruptedException, AWTException {
 		width = (short)image.getWidth(null);
 		height = (short)image.getHeight(null);
-        codificationTable = new Hashtable<Integer, Integer>();
+    codificationTable = new Hashtable<Integer, String>();
 
 		// Definir a imagem indexada
 		getIndexedImage(image);
 	}
-
 
 	// Conversao de um objecto do tipo Image numa imagem indexada
 	private void getIndexedImage(Image image) throws InterruptedException, AWTException {
@@ -37,7 +36,7 @@ public class MyGIFEncoder {
 		// obtidos com o metodo grabPixels da classe PixelGrabber
 		int values[] = new int[width * height];
 		PixelGrabber grabber = new PixelGrabber(image, 0, 0, width, height, values, 0, width);
-        grabber.grabPixels();
+    grabber.grabPixels();
 
 		// Obter imagem RGB
 		getRGB(values);
@@ -45,7 +44,6 @@ public class MyGIFEncoder {
 		// Converter para imagem indexada
 		RGB2Indexed();
 	}
-
 
 	// Obtencao dos valores RGB a partir dos valores lidos pelo PixelGrabber no metodo anterior
 	private void getRGB(int [] values) throws AWTException {
@@ -64,7 +62,6 @@ public class MyGIFEncoder {
 			}
 		}
 	}
-
 
 	// Conversao de matriz RGB para indexada: maximo de 256 cores
 	private void RGB2Indexed() throws AWTException {
@@ -107,7 +104,6 @@ public class MyGIFEncoder {
 		colors = copy;
 	}
 
-
 	// Determinacao da proxima potencia de 2 de um dado inteiro n
 	private int nextPower2(int n) {
 		int ret = 1, nIni = n;
@@ -142,12 +138,27 @@ public class MyGIFEncoder {
 		return nb;
 	}
 
+	private int resetAlphabet() {
+      for (int i = 0; i < colors.length; i++) {
+          codificationTable.put(i+1, Byte.toString(colors[i]) );
+      }
+			//Clear Code
+			codificationTable.put(colors.length, "CC");
+			//End Of Information
+			codificationTable.put(colors.length + 1, "EOI");
+			return colors.length + 2;
+  }
 
-	private void generateInitialEntriesForLzw() {
-        for (int i = 0; i < colors.length; i++) {
-            codificationTable.put(i+1, (int) colors[i]);
-        }
-    }
+	public int keyOfValue(Hashtable hash, Object value) {
+		Enumeration e = hash.keys();
+		int key = 0;
+		if(!hash.contains(value.toString())) return 0;
+    while (e.hasMoreElements()) {
+			key = (int)e.nextElement();
+	    if( (hash.get(key)) .equals(value.toString()) ) break;
+	  }
+		return key;
+	}
 
 	public void lzwCodification() {
 		// Escrever blocos com 256 bytes no maximo
@@ -155,30 +166,64 @@ public class MyGIFEncoder {
 		// Escrever blocos comprimidos, com base na matriz pixels e no minCodeSize;
 		// O primeiro bloco tem, depois do block size, o clear code
 		// Escrever end of information depois de todos os blocos
-        generateInitialEntriesForLzw();
-        int currentInputCharacter = (int)pixels[0];
+		int currentPixel;
+		int cat;
+		int nextPixel;
+		//No futuro converter para byte array
+		Hashtable<Integer, Byte> outputHash = new Hashtable<Integer, Byte>();
+		byte i = 0;
+		String color;
+		String nextColor;
 
-        for (int i = 1; i < pixels.length; i++) {
-            currentInputCharacter = currentInputCharacter << 8;
-            int sequence = currentInputCharacter + (int)pixels[i];
+		//Criaa dicionario inicial com CC e EOI, e devolve proximo index livre
+		int availableAlphabetEntry = resetAlphabet();
+		//Inserir CC depois de cada sub-block e EOI no ultimo bloco
+		//Inserir indexes no outputHash hash table
+		//LZW sem reset no dicionario
+    while(i < pixels.length) {
+				currentPixel = (int)pixels[i];
+				System.out.println("Searching for key " + currentPixel + " in dictionary");
+				color = codificationTable.get(currentPixel);
+				/*System.out.println("Color: " + color + "\n");
+				output.put(i+1, pixels[i]);
+				//Check cads
+				cat=0;
+				while(true) {
+					cat += 1;
+					if(cat == pixels.length) break;
+					nextPixel = (int)pixels[cat];
+					nextColor = codificationTable.get(nextPixel);
+					color = color.concat("-" + nextColor);
+					System.out.println("Color from concat: " + color );
+					System.out.println("Searching for color " + color + " in dictionary");
+					if(!codificationTable.contains(color)) {
+						System.out.println("Color not found adding to dictionary");
+						codificationTable.put(availableAlphabetEntry, color);
+						availableAlphabetEntry += 1;
+						break;
+					}
+				}*/
+				++i;
+    }
 
-        }
+		//System.out.print(codificationTable);
 	}
 
 	// Funcao para escrever imagem no formato GIF, versao 87a
 	// COMPLETAR ESTA FUNCAO
 	public void write(OutputStream output) throws IOException {
 		// Escrever cabecalho do GIF
+
 		writeGIFHeader(output);
 
 		// Escrever cabecalho do Image Block -> Img Block Header + min code size
 		writeImageBlockHeader(output);
 
-        lzwCodification();
+    lzwCodification();
 
-        // Escrever block terminator (0x00)
-        char terminator = 0x00;
-        output.write(terminator);
+    // Escrever block terminator (0x00)
+    char terminator = 0x00;
+    output.write(terminator);
 
 		// Trailer
 		byte trailer = 0x3b;
@@ -261,5 +306,12 @@ public class MyGIFEncoder {
 		}
 
 		output.write(minCodeSize);
+	}
+
+	public void printColorArray() {
+		for(int e=0;e+2<colors.length;) {
+				System.out.print(colors[e] + " " + colors[e+1] + " " + colors[e+2] + "\n");
+				e+=3;
+		}
 	}
 }

@@ -13,17 +13,17 @@ public class MyGIFEncoder {
 	int numColors; // numero de cores distintas na imagem
 	byte pixels[]; // array com os indices de cores, i.e., array com a imagem indexada
 	byte colors[]; // array 3 vezes maior que o anterior com os niveis RGB da imagem
-  // associados a cada indice (cores a escrever na Global Color Table)
+    // associados a cada indice (cores a escrever na Global Color Table)
 	byte [][] r, g, b; // matrizes com os valores R,G e B em cada celula da imagem
 	byte minCodeSize; // tamanho minimo dos codigos LZW
 	// associados a cada indice (cores a escrever na Global Color Table)
-  Hashtable<Integer, String> codificationTable; //HashTable for LZW algorithm
+    Hashtable<Integer, String> codificationTable; //HashTable for LZW algorithm
 
 	// Construtor e funcoes auxiliares (para obtencao da imagem indexada)
 	public MyGIFEncoder(Image image) throws InterruptedException, AWTException {
 		width = (short)image.getWidth(null);
 		height = (short)image.getHeight(null);
-    codificationTable = new Hashtable<Integer, String>();
+        codificationTable = new Hashtable<Integer, String>();
 
 		// Definir a imagem indexada
 		getIndexedImage(image);
@@ -139,24 +139,30 @@ public class MyGIFEncoder {
 	}
 
 	private int resetAlphabet() {
-      for (int i = 0; i < colors.length; i++) {
-          codificationTable.put(i+1, Byte.toString(colors[i]) );
-      }
-			//Clear Code
-			codificationTable.put(colors.length, "CC");
-			//End Of Information
-			codificationTable.put(colors.length + 1, "EOI");
-			return colors.length + 2;
-  }
+        for (int i = 0; i < colors.length; i++) {
+            codificationTable.put(i+1, Byte.toString(colors[i]) );
+        }
+        //Clear Code
+        codificationTable.put(colors.length, "CC");
+        //End Of Information
+        codificationTable.put(colors.length + 1, "EOI");
+        return colors.length + 2;
+    }
 
 	public int keyOfValue(Hashtable hash, Object value) {
 		Enumeration e = hash.keys();
 		int key = 0;
-		if(!hash.contains(value.toString())) return 0;
-    while (e.hasMoreElements()) {
+
+        if(!hash.contains(value.toString())) {
+            return 0;
+        }
+
+    	while (e.hasMoreElements()) {
 			key = (int)e.nextElement();
-	    if( (hash.get(key)) .equals(value.toString()) ) break;
-	  }
+	    	if(hash.get(key).equals(value.toString()) ) {
+                break;
+            }
+		}
 		return key;
 	}
 
@@ -180,32 +186,31 @@ public class MyGIFEncoder {
 		//Inserir CC depois de cada sub-block e EOI no ultimo bloco
 		//Inserir indexes no outputHash hash table
 		//LZW sem reset no dicionario
-    while(i < pixels.length) {
-				currentPixel = (int)pixels[i];
-				System.out.println("Searching for key " + currentPixel + " in dictionary");
-				color = codificationTable.get(currentPixel);
-				/*System.out.println("Color: " + color + "\n");
-				output.put(i+1, pixels[i]);
-				//Check cads
-				cat=0;
-				while(true) {
-					cat += 1;
-					if(cat == pixels.length) break;
-					nextPixel = (int)pixels[cat];
-					nextColor = codificationTable.get(nextPixel);
-					color = color.concat("-" + nextColor);
-					System.out.println("Color from concat: " + color );
-					System.out.println("Searching for color " + color + " in dictionary");
-					if(!codificationTable.contains(color)) {
-						System.out.println("Color not found adding to dictionary");
-						codificationTable.put(availableAlphabetEntry, color);
-						availableAlphabetEntry += 1;
-						break;
-					}
-				}*/
-				++i;
-    }
-
+        while(i < pixels.length) {
+            currentPixel = (int)pixels[i];
+            System.out.println("Searching for key " + currentPixel + " in dictionary");
+            color = codificationTable.get(currentPixel);
+            /*System.out.println("Color: " + color + "\n");
+			output.put(i+1, pixels[i]);
+			//Check cads
+			cat=0;
+			while(true) {
+				cat += 1;
+				if(cat == pixels.length) break;
+				nextPixel = (int)pixels[cat];
+			    nextColor = codificationTable.get(nextPixel);
+				color = color.concat("-" + nextColor);
+				System.out.println("Color from concat: " + color );
+				System.out.println("Searching for color " + color + " in dictionary");
+				if(!codificationTable.contains(color)) {
+					System.out.println("Color not found adding to dictionary");
+					codificationTable.put(availableAlphabetEntry, color);
+					availableAlphabetEntry += 1;
+					break;
+				}
+			}*/
+            i++;
+        }
 		//System.out.print(codificationTable);
 	}
 
@@ -219,11 +224,11 @@ public class MyGIFEncoder {
 		// Escrever cabecalho do Image Block -> Img Block Header + min code size
 		writeImageBlockHeader(output);
 
-    lzwCodification();
+        lzwCodification();
 
-    // Escrever block terminator (0x00)
-    char terminator = 0x00;
-    output.write(terminator);
+        // Escrever block terminator (0x00)
+        char terminator = 0x00;
+        output.write(terminator);
 
 		// Trailer
 		byte trailer = 0x3b;
@@ -309,9 +314,8 @@ public class MyGIFEncoder {
 	}
 
 	public void printColorArray() {
-		for(int e=0;e+2<colors.length;) {
-				System.out.print(colors[e] + " " + colors[e+1] + " " + colors[e+2] + "\n");
-				e+=3;
+		for(int e = 0; e+2 < colors.length; e += 3) {
+            System.out.print(colors[e] + " " + colors[e+1] + " " + colors[e+2] + "\n");
 		}
 	}
 }

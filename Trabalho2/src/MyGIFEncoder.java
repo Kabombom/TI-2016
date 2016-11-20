@@ -140,7 +140,7 @@ public class MyGIFEncoder {
 
 	private int resetAlphabet() {
       for (int i = 0; i < colors.length; i++) {
-          codificationTable.put(i+1, Byte.toString(colors[i]) );
+          codificationTable.put(i, Byte.toString(colors[i]) );
       }
 			//Clear Code
 			codificationTable.put(colors.length, "CC");
@@ -160,6 +160,14 @@ public class MyGIFEncoder {
 		return key;
 	}
 
+	public void pauseProg(int sec) {
+		try {
+				Thread.sleep(sec * 1000);
+		} catch(InterruptedException ex) {
+				Thread.currentThread().interrupt();
+		}
+	}
+
 	public void lzwCodification() {
 		// Escrever blocos com 256 bytes no maximo
 		// CODIFICADOR LZW AQUI !!!!
@@ -170,8 +178,8 @@ public class MyGIFEncoder {
 		int cat;
 		int nextPixel;
 		//No futuro converter para byte array
-		Hashtable<Integer, Byte> outputHash = new Hashtable<Integer, Byte>();
-		byte i = 0;
+		String output=new String("");
+		int i = 0;
 		String color;
 		String nextColor;
 
@@ -180,29 +188,37 @@ public class MyGIFEncoder {
 		//Inserir CC depois de cada sub-block e EOI no ultimo bloco
 		//Inserir indexes no outputHash hash table
 		//LZW sem reset no dicionario
+
+		float percet;
+
     while(i < pixels.length) {
-				currentPixel = (int)pixels[i];
-				System.out.println("Searching for key " + currentPixel + " in dictionary");
+				currentPixel = pixels[i];
+				percet = ( ( ((float)i) + 1 ) / pixels.length) * 100;
+				System.out.println(percet + "% Completed i= " + i + " max= " +  pixels.length);
+				//System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
 				color = codificationTable.get(currentPixel);
-				/*System.out.println("Color: " + color + "\n");
-				output.put(i+1, pixels[i]);
+				//System.out.println("Color: " + color);
+				output.concat("" + (int)pixels[i]);
 				//Check cads
 				cat=0;
 				while(true) {
 					cat += 1;
-					if(cat == pixels.length) break;
-					nextPixel = (int)pixels[cat];
+					if(i + cat == pixels.length) break;
+					nextPixel = pixels[i + cat];
 					nextColor = codificationTable.get(nextPixel);
 					color = color.concat("-" + nextColor);
-					System.out.println("Color from concat: " + color );
-					System.out.println("Searching for color " + color + " in dictionary");
+					//System.out.println("Color from concat: " + color );
+					//System.out.println("Searching for color " + color + " in dictionary");
 					if(!codificationTable.contains(color)) {
-						System.out.println("Color not found adding to dictionary");
+						//System.out.println("Color not found adding to dictionary");
 						codificationTable.put(availableAlphabetEntry, color);
 						availableAlphabetEntry += 1;
 						break;
+					} else {
+						//System.out.println("Color found");
 					}
-				}*/
+					//pauseProg(1);
+				}
 				++i;
     }
 

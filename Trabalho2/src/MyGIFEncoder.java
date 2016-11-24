@@ -141,9 +141,9 @@ public class MyGIFEncoder {
 
 
 	private int resetAlphabet() {
-				String fullColor="";
-				int i=0;
-				int cc,eoi;
+		String fullColor="";
+		int i=0;
+		int cc, eoi;
 
         while(i < colors.length) {
 			fullColor += Byte.toString(colors[i]) + ".";
@@ -220,9 +220,9 @@ public class MyGIFEncoder {
 				//System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
 				color = codificationTable.get(currentPixel);
 				//System.out.println("Color: " + color);
-				output.concat("" + pixels[i]);
+				output = output.concat("" + pixels[i]);
 				//Check cads
-				cat=0;
+				cat = 0;
 				while(true) {
 					cat += 1;
 					if(i + cat == pixels.length) break;

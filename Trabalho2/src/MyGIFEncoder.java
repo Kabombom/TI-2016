@@ -149,19 +149,18 @@ public class MyGIFEncoder {
 			fullColor += Byte.toString(colors[i]) + ".";
 			fullColor += Byte.toString(colors[i+1]) + ".";
 			fullColor += Byte.toString(colors[i+2]);
-            codificationTable.put(i, fullColor);
-			System.out.println("Teresa: " + fullColor);
+            codificationTable.put(i/3, fullColor);
 			fullColor = "";
 			i+=3;
         }
-		System.out.println("n colors: " + i/3);
+
         //Clear Code -> 2^N
-		cc = 2^(i/3);
-        codificationTable.put(colors.length, Integer.toString(cc));
+		cc = numColors;
+        codificationTable.put(i/3, Integer.toString(cc));
         //End Of Information -> 2^N + 1
-		eoi = 2^(i/3) + 1;
-        codificationTable.put(colors.length + 1, Integer.toString(eoi));
-        return colors.length + 2;
+		eoi = cc + 1;
+        codificationTable.put(i/3 + 1, Integer.toString(eoi));
+        return eoi +1;
     }
 
 	public int keyOfValue(Hashtable hash, Object value) {
@@ -198,11 +197,11 @@ public class MyGIFEncoder {
 		int currentPixel;
 		int cat;
 		int nextPixel;
-		//No futuro converter para byte array
 		String output=new String("");
 		int i = 0;
 		String color;
 		String nextColor;
+		String prevColor;
 
 		//Criaa dicionario inicial com CC e EOI, e devolve proximo index livre
 		int availableAlphabetEntry = resetAlphabet();
@@ -211,36 +210,38 @@ public class MyGIFEncoder {
 		//LZW sem reset no dicionario
 		float percet;
 
-    while(i < pixels.length) {
-				currentPixel = pixels[i];
-				percet = ( ( ((float)i) + 1 ) / pixels.length) * 100;
-				System.out.println(percet + "% Completed i= " + i + " max= " +  pixels.length);
-				//System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
-				color = codificationTable.get(currentPixel);
-				//System.out.println("Color: " + color);
-				output = output.concat("" + pixels[i]);
-				//Check cads
-				cat = 0;
-				while(true) {
-					cat += 1;
-					if(i + cat == pixels.length) break;
-					nextPixel = pixels[i + cat];
-					nextColor = codificationTable.get(nextPixel);
-					color = color.concat("-" + nextColor);
-					//System.out.println("Color from concat: " + color );
-					//System.out.println("Searching for color " + color + " in dictionary");
-					if(!codificationTable.contains(color)) {
-						//System.out.println("Color not found adding to dictionary");
-						codificationTable.put(availableAlphabetEntry, color);
-						availableAlphabetEntry += 1;
-						break;
-					} else {
-						//System.out.println("Color found");
-					}
-					//pauseProg(1);
-				}
-				++i;
+    while(i < 10) {
+		currentPixel = pixels[i];
+		percet = ( ( ((float)i) + 1 ) / pixels.length) * 100;
+		//System.out.println(percet + "% Completed i= " + i + " max= " +  pixels.length);
+		System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
+		color = codificationTable.get(currentPixel);
+		System.out.println("Color: " + color);
+		//Check cads
+		cat = 0;
+		while(true) {
+			cat += 1;
+			if(i + cat == pixels.length) break;
+			nextPixel = pixels[i + cat];
+			prevColor =	color;
+			nextColor = codificationTable.get(nextPixel);
+			color = color.concat("-" + nextColor);
+			System.out.println("Color from concat: " + color );
+			System.out.println("Searching for color " + color + " in dictionary");
+			if(!codificationTable.contains(color)) {
+				System.out.println("Color not found adding to dictionary at \nSending color " + prevColor + " at " + keyOfValue(codificationTable, prevColor));
+				output = output.concat("+" + keyOfValue(codificationTable, prevColor));
+				codificationTable.put(availableAlphabetEntry, color);
+				availableAlphabetEntry += 1;
+				break;
+			} else {
+				//System.out.println("Color found");
+			}
+			//pauseProg(1);
+		}
+		++i;
     }
+		System.out.println(output);
 		//System.out.print(codificationTable);
 	}
 

@@ -107,42 +107,34 @@ public class MyGIFEncoder {
 	// Determinacao da proxima potencia de 2 de um dado inteiro n
 	private int nextPower2(int n) {
 		int ret = 1, nIni = n;
-
 		if (n == 0)
 			return 0;
-
 		while (n != 0) {
 			ret *= 2;
 			n /= 2;
 		}
-
 		if (ret % nIni == 0)
 			ret = nIni;
-
 		return ret;
 	}
 
 	// Numero de bits necessario para representar n
 	private byte numBits(int n) {
 		byte nb = 0;
-
 		if (n == 0)
 			return 0;
-
 		while (n != 0) {
 			nb++;
 			n /= 2;
 		}
-
 		return nb;
 	}
 
 	private void fixPixelArray(){};//Set indexes to new dictionary
 
-
 	private int resetAlphabet() {
-		String fullColor="";
-		int i=0;
+		String fullColor = "";
+		int i = 0;
 		int cc, eoi;
 
         while(i < colors.length) {
@@ -171,13 +163,15 @@ public class MyGIFEncoder {
             return 0;
         }
 
+        /*
     	while (e.hasMoreElements()) {
 			key = (int)e.nextElement();
 	    	if(hash.get(key).equals(value.toString()) ) {
                 break;
             }
 		}
-		return key;
+		return key;*/
+        return 0;
 	}
 
 	public void pauseProg(int sec) {
@@ -190,7 +184,6 @@ public class MyGIFEncoder {
 
 	public void lzwCodification() {
 		// Escrever blocos com 256 bytes no maximo
-		// CODIFICADOR LZW AQUI !!!!
 		// Escrever blocos comprimidos, com base na matriz pixels e no minCodeSize;
 		// O primeiro bloco tem, depois do block size, o clear code
 		// Escrever end of information depois de todos os blocos
@@ -203,7 +196,7 @@ public class MyGIFEncoder {
 		String nextColor;
 		String prevColor;
 
-		//Criaa dicionario inicial com CC e EOI, e devolve proximo index livre
+		// Cria dicionario inicial com CC e EOI, e devolve proximo index livre
 		int availableAlphabetEntry = resetAlphabet();
 		//Inserir CC depois de cada sub-block e EOI no ultimo bloco
 		//Inserir indexes no outputHash hash table

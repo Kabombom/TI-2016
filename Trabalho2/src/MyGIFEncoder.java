@@ -163,15 +163,13 @@ public class MyGIFEncoder {
             return 0;
         }
 
-        /*
     	while (e.hasMoreElements()) {
 			key = (int)e.nextElement();
 	    	if(hash.get(key).equals(value.toString()) ) {
                 break;
             }
 		}
-		return key;*/
-        return 0;
+		return key;
 	}
 
 	public void pauseProg(int sec) {

@@ -146,21 +146,21 @@ public class MyGIFEncoder {
 				int cc,eoi;
 
         while(i < colors.length) {
-						fullColor += Byte.toString(colors[i]) + ".";
-						fullColor += Byte.toString(colors[i+1]) + ".";
-						fullColor += Byte.toString(colors[i+2]);
+			fullColor += Byte.toString(colors[i]) + ".";
+			fullColor += Byte.toString(colors[i+1]) + ".";
+			fullColor += Byte.toString(colors[i+2]);
             codificationTable.put(i, fullColor);
-						System.out.println("Teresa: " + fullColor);
-						fullColor = "";
-						i+=3;
+			System.out.println("Teresa: " + fullColor);
+			fullColor = "";
+			i+=3;
         }
-				System.out.println("n colors: " + i/3);
-        //Clear Code -> 2^N
-				cc = 2^(i/3);
+		System.out.println("n colors: " + i/3);
+        // Clear Code -> 2^N
+		cc = 2^(i/3);
         codificationTable.put(colors.length, Integer.toString(cc));
-        //End Of Information -> 2^N + 1
-				eoi = 2^(i/3) + 1;
-        codificationTable.put(colors.length + 1, Integer.toString());
+        // End Of Information -> 2^N + 1
+		eoi = 2^(i/3) + 1;
+        codificationTable.put(colors.length + 1, Integer.toString(eoi));
         return colors.length + 2;
     }
 
@@ -172,13 +172,15 @@ public class MyGIFEncoder {
             return 0;
         }
 
+        /*
     	while (e.hasMoreElements()) {
 			key = (int)e.nextElement();
 	    	if(hash.get(key).equals(value.toString()) ) {
                 break;
             }
 		}
-		return key;
+		return key;*/
+        return 0;
 	}
 
 	public void pauseProg(int sec) {
@@ -226,6 +228,7 @@ public class MyGIFEncoder {
 					if(i + cat == pixels.length) break;
 					nextPixel = pixels[i + cat];
 					nextColor = codificationTable.get(nextPixel);
+
 					color = color.concat("-" + nextColor);
 					//System.out.println("Color from concat: " + color );
 					//System.out.println("Searching for color " + color + " in dictionary");

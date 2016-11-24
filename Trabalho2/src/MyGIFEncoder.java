@@ -36,7 +36,7 @@ public class MyGIFEncoder {
 		// obtidos com o metodo grabPixels da classe PixelGrabber
 		int values[] = new int[width * height];
 		PixelGrabber grabber = new PixelGrabber(image, 0, 0, width, height, values, 0, width);
-    grabber.grabPixels();
+    	grabber.grabPixels();
 
 		// Obter imagem RGB
 		getRGB(values);

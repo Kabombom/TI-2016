@@ -122,7 +122,6 @@ public class MyGIFEncoder {
 		return ret;
 	}
 
-
 	// Numero de bits necessario para representar n
 	private byte numBits(int n) {
 		byte nb = 0;
@@ -138,14 +137,30 @@ public class MyGIFEncoder {
 		return nb;
 	}
 
+	private void fixPixelArray(){};//Set indexes to new dictionary
+
+
 	private int resetAlphabet() {
-        for (int i = 0; i < colors.length; i++) {
-            codificationTable.put(i+1, Byte.toString(colors[i]) );
+				String fullColor="";
+				int i=0;
+				int cc,eoi;
+
+        while(i < colors.length) {
+						fullColor += Byte.toString(colors[i]) + ".";
+						fullColor += Byte.toString(colors[i+1]) + ".";
+						fullColor += Byte.toString(colors[i+2]);
+            codificationTable.put(i, fullColor);
+						System.out.println("Teresa: " + fullColor);
+						fullColor = "";
+						i+=3;
         }
-        //Clear Code
-        codificationTable.put(colors.length, "CC");
-        //End Of Information
-        codificationTable.put(colors.length + 1, "EOI");
+				System.out.println("n colors: " + i/3);
+        //Clear Code -> 2^N
+				cc = 2^(i/3);
+        codificationTable.put(colors.length, Integer.toString(cc));
+        //End Of Information -> 2^N + 1
+				eoi = 2^(i/3) + 1;
+        codificationTable.put(colors.length + 1, Integer.toString());
         return colors.length + 2;
     }
 
@@ -203,7 +218,7 @@ public class MyGIFEncoder {
 				//System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
 				color = codificationTable.get(currentPixel);
 				//System.out.println("Color: " + color);
-				output.concat("" + (int)pixels[i]);
+				output.concat("" + pixels[i]);
 				//Check cads
 				cat=0;
 				while(true) {
@@ -321,6 +336,7 @@ public class MyGIFEncoder {
 
 		// LZW Minimum Code Size (com base no numero de cores utilizadas)
 		minCodeSize = (byte)(numBits(numColors - 1));
+		System.out.println("n: " + minCodeSize);
 		if (minCodeSize == 1) {  // Imagens binarias -> caso especial (pag. 26 do RFC)
 			minCodeSize++;
 		}

@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Set;
 
 // Para o LZW
 // Colors e o alfabeto
@@ -156,20 +158,18 @@ public class MyGIFEncoder {
     }
 
 	public int keyOfValue(Hashtable hash, Object value) {
-		Enumeration e = hash.keys();
-		int key = 0;
-
-        if(!hash.contains(value.toString())) {
-            return 0;
-        }
-
-    	while (e.hasMoreElements()) {
-			key = (int)e.nextElement();
-	    	if(hash.get(key).equals(value.toString()) ) {
-                break;
-            }
+		Enumeration keys = hash.keys();
+		//System.out.println("VALUE " + value.toString());
+		int i = 0;
+		while(keys.hasMoreElements()) {
+			String valueFromHash = (String) hash.get(keys.nextElement());
+			//System.out.println("Value from Hash " + valueFromHash);
+			if (valueFromHash.equals(value.toString())) {
+				return i;
+			}
+			i++;
 		}
-		return key;
+		return 0;
 	}
 
 	public void pauseProg(int sec) {
@@ -203,8 +203,8 @@ public class MyGIFEncoder {
 
     while(i < 10) {
 		currentPixel = pixels[i];
-		percet = ( ( ((float)i) + 1 ) / pixels.length) * 100;
-		//System.out.println(percet + "% Completed i= " + i + " max= " +  pixels.length);
+		// percet = ( ( ((float)i) + 1 ) / pixels.length) * 100;
+		// System.out.println(percet + "% Completed i= " + i + " max= " +  pixels.length);
 		System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
 		color = codificationTable.get(currentPixel);
 		System.out.println("Color: " + color);

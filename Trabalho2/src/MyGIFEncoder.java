@@ -23,16 +23,18 @@ public class MyGIFEncoder {
 	private int cc, eoi;
 	//Bits usados
 	private int usedBits = 0;
-	//Bits disponiveis
+	//bits disponiveis
 	private int availableBits = 8;
-	//Bits disponiveis no Sub-Bloco
-	private int usedSubBlockBits = 256;
-	//Byte que será inserido
-	private byte toBeInserted;
-	//Byte que guardará bits que sobram
+	//bits disponiveis no sub block
+	private int availableSubBlock = 256;
+	//byte que vai ser inserido
+	private int toBeInserted;
+	//numero temporario
 	private int tempNum;
 	//Code Size
 	private int codeSize;
+	//valor correspondente ao valor maximo que o code size pode ter -> 3 * nextPower2(minCodeSize)
+	private int maxValue;
 	// associados a cada indice (cores a escrever na Global Color Table)
     private Hashtable<Integer, String> codificationTable; //HashTable for LZW algorithm
 
@@ -188,15 +190,15 @@ public class MyGIFEncoder {
 
 		/*
 		Enumeration keys = hash.keys();
- +		//System.out.println("VALUE " + value.toString());
- +		int i = 0;
- +		while(keys.hasMoreElements()) {
- +			String valueFromHash = (String) hash.get(keys.nextElement());
- +			//System.out.println("Value from Hash " + valueFromHash);
- +			if (valueFromHash.equals(value.toString())) {
- +				return i;
- +			}
- +			i++;
+ 		//System.out.println("VALUE " + value.toString());
+ 		int i = 0;
+ 		while(keys.hasMoreElements()) {
+ 			String valueFromHash = (String) hash.get(keys.nextElement());
+ 			//System.out.println("Value from Hash " + valueFromHash);
+ 			if (valueFromHash.equals(value.toString())) {
+ 				return i;
+ 			}
+ 			i++;
  		}
 		return 0;
 		*/
@@ -228,49 +230,97 @@ public class MyGIFEncoder {
 	}
 
 	//Escreve numero no output
-	private String writeOnOutput(OutputStream output, String output_str, int num) throws IOException {
+	private int writeOnOutput(OutputStream output, String output_str, int num) throws IOException {
 		/*
-		private int usedBits = 0;
-		private int availableBits = 8;
-		private int usedSubBlockBits = 256;
-		private byte toBeInserted;
-		private int tempNum;
-		private int codeSize;
+		Status
+		-1 -> reenviar numero antes de concatenaçoes
+		 0 -> (byte nao preenchido) verificar se vao ser inseridos mais numeros,
+		 	  	se nao, preencher resto do sub block com 0's e inserir eoi
+			  	se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar
+		 1 -> (byte preenchido) verificar se vao ser inseridos mais numeros,
+		 		se nao, inserir eoi
+		 		se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar
 		*/
-		//Adaptar ao codeSize existente
-		tempNum = num;
-		if(usedBits == 0) {
-			while(numBits(tempNum)>8) {
-				output_str = output_str.concat("\n" + numToBitString(tempNum));
-				toBeInserted = (byte)(tempNum & 0xFF);
-				output.write(toBeInserted);
-				toBeInserted = (byte) 0x00;
-				tempNum = tempNum >> availableBits;
-			}
-			//Bits que sobram
-			if(numBits(tempNum)>0) {
-				toBeInserted = (byte)(tempNum & 0xFF);
-				usedBits = numBits(tempNum);
-				availableBits = 8 - usedBits;
-				if(usedBits == 8) {
-					output_str = output_str.concat("\n" + numToBitString(tempNum));
-					output.write(toBeInserted);
-					toBeInserted = (byte) 0x00;
-					tempNum = tempNum >> availableBits;
-					usedBits = 0;
-					availableBits = 8;
-				}
-			}
-			//Se quiser inserir um 0
-			if(tempNum == 0) {
-				//
-			}
-		} else {
 
+		private int temp;
+		private int inNum;
+
+		inNum = num;
+
+		//Update codeSize se o num for maior que 2^(codeSize) - 1
+		if( numBits(num) > codeSize ) {
+			codeSize +=1;
 		}
 
+		//Reset do dicionario se codeSize for maior que 3 * 2^(minCodeSize + 1) e adicionar CC ao output
+		if( inNum >= maxValue ) {
+			codificationTable = resetAlphabet();
+			codeSize = minCodeSize;
+			//Inserir clear code no output
+			reqBits = numBits(cc);
+			writeOnOutput(output, output_str, cc);
 
-		return output_str;
+			return -1 //Sinal para reenviar num apos reset no dicionario
+		}
+
+		reqBits = codeSize;
+
+		//O numero de bits necessario para representar inNum é menor ou igual a codeSize
+		//Enquanto tiver bits para representar
+		while(inNum > 0) {
+			//Bits a adicionar
+			temp = inNum << usedBits;
+			//Preencher byte
+			toBeInserted = (byte)((temp | toBeInserted) & 0xFF);
+			//Update inNum, contendo os bits nao adicionados
+			inNum = inNum >> availableBits;
+			//Se o numero de bits a adicionar foi maior ou igual que o numero de bits disponiveis no byte
+			if(reqBits >= availableBits) {
+				output.write(toBeInserted);
+				output_str = output_str.concat("\n" + numToBitString(toBeInserted));
+				reqBits -= availableBits;
+				availableBits = 8;
+				usedBits = 0;
+				availableSubBlock -= 8;
+				if(availableSubBlock == 0 && reqBits > 0) {
+					//Se ainda tenho bits para adicionar
+					output.write(0xFF);
+					output_str = output_str.concat("\n" + numToBitString(0xFF));
+					availableSubBlock = 256;
+				} else if(availableSubBlock == 0 && reqBits == 0) {
+					//Se todos os bits foram adicionados devolver 1 e verificar se vao ser adicionados mais bytes
+					availableSubBlock = 256;
+					return 1;
+				}
+			} else reqBits = 0;
+		}
+		//Se ainda o numero fe bits necessario para representar o num for menor que o code size devemos preencher os restantes bits com 0's
+		while(reqBits > 0) {
+			if(reqBits >= availableBits) {
+				output.write(toBeInserted);
+				output_str = output_str.concat("\n" + numToBitString(toBeInserted));
+				reqBits -= availableBits;
+				availableBits = 8;
+				usedBits = 0;
+				availableSubBlock -= 8;
+				if(availableSubBlock == 0 && reqBits > 0) {
+					//Se ainda tenho bits para adicionar
+					output.write(0xFF);
+					output_str = output_str.concat("\n" + numToBitString(0xFF));
+					availableSubBlock = 256;
+				} else if(availableSubBlock == 0 && reqBits == 0) {
+					//Se todos os bits foram adicionados devolver 1 e verificar se vao ser adicionados mais bytes
+					availableSubBlock = 256;
+					return 1;
+				}
+			} else {
+				usedBits += reqBits;
+				availableBits -= reqBits;
+				reqBits = 0;
+				//Se o ultimo byte nao esta preenchido devolver 0 e verificar se vao haver mais numeros
+				return 0;
+			}
+		}
 	}
 
 	private void lzwCodification(OutputStream output) throws IOException {
@@ -287,27 +337,16 @@ public class MyGIFEncoder {
 		String nextColor;
 		String prevColor;
 
-		//Alerar codeSize sempre que o tempNum = 2^(current code size)-1
+		//valor correspondente ao valor maximo que o code size pode ter -> 3 * 2^(minCodeSize + 1)
+		maxValue = 3 * nextPower2(minCodeSize);
+		//primeiro codesize sera minCodeSize + 1
 		codeSize = minCodeSize+1;
 		// Cria dicionario inicial com CC e EOI, e devolve proximo index livre
 		int availableAlphabetEntry = resetAlphabet();
-		//Inserir block size - 256
+		//Inserir block size - 256 -> admitimos que nao vamos adicionar uma imagem vazia
 		output.write((byte)0xFF);
-		//Inserir clear code
-		output_str = writeOnOutput(output, output_str, cc);
-
-		//LIL TEST
-		usedBits = numBits(cc);
-		tempNum = 1;
-		int tempByte = ((tempNum << usedBits) & 0xFF);
-		int tempByte2 = (cc & 0xFF);
-		int res = (tempByte | tempByte2);
-		output_str = output_str.concat("\n" + numToBitString(tempByte));
-		output_str = output_str.concat("\n" + numToBitString(tempByte2));
-		output_str = output_str.concat("\n");
-		output_str = output_str.concat("\n" + numToBitString(res & 0xFF));
-		//END OF LIL TEST
-
+		//Inserir clear code -> poderemos ignorar o return da Funcao pq inserimos a cima que o sub block size ia ser 256
+		writeOnOutput(output, output_str, cc);
 		// Inserir CC depois de cada sub-block e EOI no ultimo bloco
 
         while(i < 10) {
@@ -330,9 +369,10 @@ public class MyGIFEncoder {
                 if(!codificationTable.contains(color)) {
                     System.out.println("Color not found adding to dictionary at \nSending color " + prevColor + " at " + keyOfValue(codificationTable, prevColor));
 					tempNum = keyOfValue(codificationTable, prevColor);
-					//output_str = writeOnOutput(output, output_str);
                     codificationTable.put(availableAlphabetEntry, color);
                     availableAlphabetEntry += 1;
+					//TO DO -> aplicar mudanças dependendo do valor de return
+					writeOnOutput(output, output_str, tempNum);
                     break;
                 } /*else {
                     System.out.println("Color found");

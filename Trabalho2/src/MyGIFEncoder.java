@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
+import java.lang.Math.*;
 
 // Para o LZW
 // Colors e o alfabeto
@@ -18,6 +19,20 @@ public class MyGIFEncoder {
     // associados a cada indice (cores a escrever na Global Color Table)
 	private byte [][] r, g, b; // matrizes com os valores R,G e B em cada celula da imagem
 	private byte minCodeSize; // tamanho minimo dos codigos LZW
+	//Codigos
+	private int cc, eoi;
+	//Bits usados
+	private int usedBits = 0;
+	//Bits disponiveis
+	private int availableBits = 8;
+	//Bits disponiveis no Sub-Bloco
+	private int usedSubBlockBits = 256;
+	//Byte que será inserido
+	private byte toBeInserted;
+	//Byte que guardará bits que sobram
+	private int tempNum;
+	//Code Size
+	private int codeSize;
 	// associados a cada indice (cores a escrever na Global Color Table)
     private Hashtable<Integer, String> codificationTable; //HashTable for LZW algorithm
 
@@ -132,12 +147,9 @@ public class MyGIFEncoder {
 		return nb;
 	}
 
-	private void fixPixelArray(){} // Set indexes to new dictionary
-
 	private int resetAlphabet() {
 		String fullColor = "";
 		int i = 0;
-		int cc, eoi;
 
         while(i < colors.length) {
 			fullColor += Byte.toString(colors[i]) + ".";
@@ -149,25 +161,45 @@ public class MyGIFEncoder {
         }
 
         // Clear Code -> 2^N
-		cc = numColors;
+		cc = (int)Math.pow(2,minCodeSize);
         codificationTable.put(i/3, Integer.toString(cc));
         // End Of Information -> 2^N + 1
 		eoi = cc + 1;
         codificationTable.put(i/3 + 1, Integer.toString(eoi));
-        return eoi +1;
+        return eoi + 1;
     }
 
 	private int keyOfValue(Hashtable hash, Object value) {
-		Enumeration keys = hash.keys();
-		int i = 0;
-		while(keys.hasMoreElements()) {
-			String valueFromHash = (String) hash.get(keys.nextElement());
-			if (valueFromHash.equals(value.toString())) {
-				return i;
-			}
-			i++;
+		Enumeration e = hash.keys();
+ 		int key = 0;
+
+		if(!hash.contains(value.toString())) {
+		   return -1;
 		}
+
+		while (e.hasMoreElements()) {
+ 		   key = (int)e.nextElement();
+ 		   if(hash.get(key).equals(value.toString()) ) {
+ 				break;
+ 			}
+		}
+
+ 		return key;
+
+		/*
+		Enumeration keys = hash.keys();
+ +		//System.out.println("VALUE " + value.toString());
+ +		int i = 0;
+ +		while(keys.hasMoreElements()) {
+ +			String valueFromHash = (String) hash.get(keys.nextElement());
+ +			//System.out.println("Value from Hash " + valueFromHash);
+ +			if (valueFromHash.equals(value.toString())) {
+ +				return i;
+ +			}
+ +			i++;
+ 		}
 		return 0;
+		*/
 	}
 
 	private void pauseProg(int sec) {
@@ -178,7 +210,70 @@ public class MyGIFEncoder {
 		}
 	}
 
-	private void lzwCodification() {
+	private String numToBitString(int num) {
+		String out = "";
+		int nbits = 0;
+
+		while(nbits<8) {
+			if(num%2 != 0) {
+				out = new String("1" + out);
+			} else {
+				out = new String("0" + out);
+			}
+			num = num / 2;
+			++nbits;
+		}
+
+		return out;
+	}
+
+	//Escreve numero no output
+	private String writeOnOutput(OutputStream output, String output_str, int num) throws IOException {
+		/*
+		private int usedBits = 0;
+		private int availableBits = 8;
+		private int usedSubBlockBits = 256;
+		private byte toBeInserted;
+		private int tempNum;
+		private int codeSize;
+		*/
+		//Adaptar ao codeSize existente
+		tempNum = num;
+		if(usedBits == 0) {
+			while(numBits(tempNum)>8) {
+				output_str = output_str.concat("\n" + numToBitString(tempNum));
+				toBeInserted = (byte)(tempNum & 0xFF);
+				output.write(toBeInserted);
+				toBeInserted = (byte) 0x00;
+				tempNum = tempNum >> availableBits;
+			}
+			//Bits que sobram
+			if(numBits(tempNum)>0) {
+				toBeInserted = (byte)(tempNum & 0xFF);
+				usedBits = numBits(tempNum);
+				availableBits = 8 - usedBits;
+				if(usedBits == 8) {
+					output_str = output_str.concat("\n" + numToBitString(tempNum));
+					output.write(toBeInserted);
+					toBeInserted = (byte) 0x00;
+					tempNum = tempNum >> availableBits;
+					usedBits = 0;
+					availableBits = 8;
+				}
+			}
+			//Se quiser inserir um 0
+			if(tempNum == 0) {
+				//
+			}
+		} else {
+
+		}
+
+
+		return output_str;
+	}
+
+	private void lzwCodification(OutputStream output) throws IOException {
 		// Escrever blocos com 256 bytes no maximo
 		// Escrever blocos comprimidos, com base na matriz pixels e no minCodeSize;
 		// O primeiro bloco tem, depois do block size, o clear code
@@ -186,25 +281,42 @@ public class MyGIFEncoder {
 		int currentPixel;
 		int cat;
 		int nextPixel;
-		String output = "";
+		String output_str = "";
 		int i = 0;
 		String color;
 		String nextColor;
 		String prevColor;
 
+		//Alerar codeSize sempre que o tempNum = 2^(current code size)-1
+		codeSize = minCodeSize+1;
 		// Cria dicionario inicial com CC e EOI, e devolve proximo index livre
 		int availableAlphabetEntry = resetAlphabet();
+		//Inserir block size - 256
+		output.write((byte)0xFF);
+		//Inserir clear code
+		output_str = writeOnOutput(output, output_str, cc);
+
+		//LIL TEST
+		usedBits = numBits(cc);
+		tempNum = 1;
+		int tempByte = ((tempNum << usedBits) & 0xFF);
+		int tempByte2 = (cc & 0xFF);
+		int res = (tempByte | tempByte2);
+		output_str = output_str.concat("\n" + numToBitString(tempByte));
+		output_str = output_str.concat("\n" + numToBitString(tempByte2));
+		output_str = output_str.concat("\n");
+		output_str = output_str.concat("\n" + numToBitString(res & 0xFF));
+		//END OF LIL TEST
+
 		// Inserir CC depois de cada sub-block e EOI no ultimo bloco
-		// Inserir indexes no outputHash hash table
-		// LZW sem reset no dicionario
 
         while(i < 10) {
             currentPixel = pixels[i];
             // percet = ( ( ((float)i) + 1 ) / pixels.length) * 100;
             // System.out.println(percet + "% Completed i= " + i + " max= " +  pixels.length);
-            System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
+            //System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
             color = codificationTable.get(currentPixel);
-            System.out.println("Color: " + color);
+            //System.out.println("Color: " + color);
             //Check cads
             cat = 0;
             while(i + cat != pixels.length) {
@@ -213,11 +325,12 @@ public class MyGIFEncoder {
                 prevColor =	color;
                 nextColor = codificationTable.get(nextPixel);
                 color = color.concat("-" + nextColor);
-                System.out.println("Color from concat: " + color );
-                System.out.println("Searching for color " + color + " in dictionary");
+                //System.out.println("Color from concat: " + color );
+                //System.out.println("Searching for color " + color + " in dictionary");
                 if(!codificationTable.contains(color)) {
                     System.out.println("Color not found adding to dictionary at \nSending color " + prevColor + " at " + keyOfValue(codificationTable, prevColor));
-                    output = output.concat("+" + keyOfValue(codificationTable, prevColor));
+					tempNum = keyOfValue(codificationTable, prevColor);
+					//output_str = writeOnOutput(output, output_str);
                     codificationTable.put(availableAlphabetEntry, color);
                     availableAlphabetEntry += 1;
                     break;
@@ -228,7 +341,7 @@ public class MyGIFEncoder {
             }
             ++i;
         }
-		System.out.println(output);
+		System.out.println(output_str);
 		//System.out.print(codificationTable);
 	}
 
@@ -241,7 +354,7 @@ public class MyGIFEncoder {
 		// Escrever cabecalho do Image Block -> Img Block Header + min code size
 		writeImageBlockHeader(output);
 
-        lzwCodification();
+        lzwCodification(output);
 
         // Escrever block terminator (0x00)
         char terminator = 0x00;
@@ -323,7 +436,6 @@ public class MyGIFEncoder {
 
 		// LZW Minimum Code Size (com base no numero de cores utilizadas)
 		minCodeSize = (numBits(numColors - 1));
-		System.out.println("n: " + minCodeSize);
 		if (minCodeSize == 1) {  // Imagens binarias -> caso especial (pag. 26 do RFC)
 			minCodeSize++;
 		}

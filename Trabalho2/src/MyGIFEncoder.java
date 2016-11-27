@@ -233,12 +233,12 @@ public class MyGIFEncoder {
 	private int writeOnOutput(OutputStream output, String output_str, int num) throws IOException {
 		/*
 		Status
-		-1 -> reenviar numero antes de concatenaçoes
-		 0 -> (byte nao preenchido) verificar se vao ser inseridos mais numeros,
-		 	  	se nao, preencher resto do sub block com 0's e inserir eoi
-			  	se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar
-		 1 -> (byte preenchido) verificar se vao ser inseridos mais numeros,
-		 		se nao, inserir eoi
+		-1 -> reenviar numero antes de concatenacoes
+		 0 -> (byte nao preenchido) verificar se há mais numeros para serem inseridos
+		 		se sim, continuar
+				se nao, inserir eoi e preencher sub bloco com 0's
+		 1 -> (byte preenchido) verificar se vao ser inseridos mais numeros
+		 		se nao, inserir sub block size, availableSubBlock= (sub block size), inserir EOI e preencher com 0's
 		 		se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar
 		*/
 
@@ -254,10 +254,7 @@ public class MyGIFEncoder {
 
 		//Reset do dicionario se codeSize for maior que 3 * 2^(minCodeSize + 1) e adicionar CC ao output
 		if( inNum >= maxValue ) {
-			codificationTable = resetAlphabet();
-			codeSize = minCodeSize;
-			//Inserir clear code no output
-			reqBits = numBits(cc);
+			codeSize = minCodeSize+1;
 			writeOnOutput(output, output_str, cc);
 
 			return -1 //Sinal para reenviar num apos reset no dicionario
@@ -292,9 +289,12 @@ public class MyGIFEncoder {
 					availableSubBlock = 256;
 					return 1;
 				}
-			} else reqBits = 0;
+			} else {
+				//Byte aidna nao foi preenchido para ser inserido
+				reqBits = 0;
+			}
 		}
-		//Se ainda o numero fe bits necessario para representar o num for menor que o code size devemos preencher os restantes bits com 0's
+		//Se ainda o numero de bits necessarios para representar o num for menor que o code size devemos preencher os restantes bits com 0's
 		while(reqBits > 0) {
 			if(reqBits >= availableBits) {
 				output.write(toBeInserted);
@@ -304,23 +304,24 @@ public class MyGIFEncoder {
 				usedBits = 0;
 				availableSubBlock -= 8;
 				if(availableSubBlock == 0 && reqBits > 0) {
-					//Se ainda tenho bits para adicionar
+					//Se ainda tenho bits para adicionar e o sub bloco acabou
+					//insiro o block size
 					output.write(0xFF);
 					output_str = output_str.concat("\n" + numToBitString(0xFF));
 					availableSubBlock = 256;
 				} else if(availableSubBlock == 0 && reqBits == 0) {
-					//Se todos os bits foram adicionados devolver 1 e verificar se vao ser adicionados mais bytes
-					availableSubBlock = 256;
+					//o byte foi preenchido e inserido, sub block esgotado
 					return 1;
 				}
 			} else {
 				usedBits += reqBits;
 				availableBits -= reqBits;
 				reqBits = 0;
-				//Se o ultimo byte nao esta preenchido devolver 0 e verificar se vao haver mais numeros
-				return 0;
+				//ultimo byte nao foi preenchido nem inserido
 			}
 		}
+		//ultimo byte nao preenchido e nao inserido
+		return 0;
 	}
 
 	private void lzwCodification(OutputStream output) throws IOException {
@@ -349,6 +350,17 @@ public class MyGIFEncoder {
 		writeOnOutput(output, output_str, cc);
 		// Inserir CC depois de cada sub-block e EOI no ultimo bloco
 
+		/*
+		Status
+		-1 -> reenviar numero antes de concatenacoes
+		 0 -> (byte nao preenchido) verificar se há mais numeros para serem inseridos
+		 		se sim, continuar
+				se nao, inserir eoi e preencher sub bloco com 0's
+		 1 -> (byte preenchido) verificar se vao ser inseridos mais numeros
+		 		se nao, inserir sub block size, availableSubBlock= (sub block size), inserir EOI e preencher com 0's
+		 		se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar
+		*/
+
         while(i < 10) {
             currentPixel = pixels[i];
             // percet = ( ( ((float)i) + 1 ) / pixels.length) * 100;
@@ -372,7 +384,48 @@ public class MyGIFEncoder {
                     codificationTable.put(availableAlphabetEntry, color);
                     availableAlphabetEntry += 1;
 					//TO DO -> aplicar mudanças dependendo do valor de return
-					writeOnOutput(output, output_str, tempNum);
+					switch( writeOnOutput(output, output_str, tempNum) ) {
+						//reset no dicionario
+						case -1:
+							//reset
+							availableAlphabetEntry = resetAlphabet();
+							//voltar a enviar numero antes de concatenacoes
+							--i;
+							break;
+						//Numero inserido
+						case 0:
+							//Se não houver mais pixeis continuar
+							if( i+1 == pixels.length ) {
+								//inserir EOI e atualizar byte
+								switch( writeOnOutput(output, output_str, eoi) ) {
+									//Ultimo byte nao preenchido
+									case 0:
+										//Se o sub bloco ainda tiver espaço preencher com 0's
+										//TODO
+										break;
+									//sub Block acabou e o byte ultimo byte foi inserido
+									case 1:
+										//Sair da funçao e adicionar block terminator
+										return;
+								}
+							}
+							//Se houver continuar
+							break;
+						//Fim de sub bloco e o byte esta preenchido
+						case 1:
+							//Se nao houver mais numeros
+							if( i+1 == pixels.length ) {
+								//Inserir EOI
+								writeOnOutput(output, output_str, eoi);
+								//preencher sub bloco com 0's
+								//TODO
+							} else {
+							//Se ainda tiver numeros para adicionar
+								availableSubBlock = 256;
+								output.write((byte)0xFF);
+							}
+							break;
+					}
                     break;
                 } /*else {
                     System.out.println("Color found");

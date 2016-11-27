@@ -19,23 +19,23 @@ public class MyGIFEncoder {
     // associados a cada indice (cores a escrever na Global Color Table)
 	private byte [][] r, g, b; // matrizes com os valores R,G e B em cada celula da imagem
 	private byte minCodeSize; // tamanho minimo dos codigos LZW
-	//Codigos
+	// Codigos
 	private int cc, eoi;
-	//Bits usados
+	// Bits usados
 	private int usedBits = 0;
-	//bits disponiveis
+	// Bits disponiveis
 	private int availableBits = 8;
-	//bits disponiveis no sub block
+	// Bits disponiveis no sub block
 	private int availableSubBlock = 256;
-	//byte que vai ser inserido
+	// Byte que vai ser inserido
 	private int toBeInserted;
-	//numero temporario
+	// Numero temporario
 	private int tempNum;
-	//Code Size
+	// Code Size
 	private int codeSize;
-	//valor correspondente ao valor maximo que o code size pode ter -> 3 * nextPower2(minCodeSize)
+	// Valor correspondente ao valor maximo que o code size pode ter -> 3 * nextPower2(minCodeSize)
 	private int maxValue;
-	// associados a cada indice (cores a escrever na Global Color Table)
+	// Associados a cada indice (cores a escrever na Global Color Table)
     private Hashtable<Integer, String> codificationTable; //HashTable for LZW algorithm
 
 	// Construtor e funcoes auxiliares (para obtencao da imagem indexada)
@@ -172,23 +172,6 @@ public class MyGIFEncoder {
     }
 
 	private int keyOfValue(Hashtable hash, Object value) {
-		Enumeration e = hash.keys();
- 		int key = 0;
-
-		if(!hash.contains(value.toString())) {
-		   return -1;
-		}
-
-		while (e.hasMoreElements()) {
- 		   key = (int)e.nextElement();
- 		   if(hash.get(key).equals(value.toString()) ) {
- 				break;
- 			}
-		}
-
- 		return key;
-
-		/*
 		Enumeration keys = hash.keys();
  		//System.out.println("VALUE " + value.toString());
  		int i = 0;
@@ -201,35 +184,32 @@ public class MyGIFEncoder {
  			i++;
  		}
 		return 0;
-		*/
 	}
 
 	private void pauseProg(int sec) {
 		try {
-				Thread.sleep(sec * 1000);
+            Thread.sleep(sec * 1000);
 		} catch(InterruptedException ex) {
-				Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
 		}
 	}
 
 	private String numToBitString(int num) {
 		String out = "";
 		int nbits = 0;
-
-		while(nbits<8) {
-			if(num%2 != 0) {
-				out = new String("1" + out);
+		while(nbits < 8) {
+			if(num % 2 != 0) {
+				out = "1";
 			} else {
-				out = new String("0" + out);
+				out = "0";
 			}
 			num = num / 2;
 			++nbits;
 		}
-
 		return out;
 	}
 
-	//Escreve numero no output
+	// Escreve numero no output
 	private int writeOnOutput(OutputStream output, String output_str, int num) throws IOException {
 		/*
 		Status
@@ -242,8 +222,8 @@ public class MyGIFEncoder {
 		 		se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar
 		*/
 
-		private int temp;
-		private int inNum;
+		int temp;
+		int inNum;
 
 		inNum = num;
 
@@ -252,29 +232,31 @@ public class MyGIFEncoder {
 			codeSize +=1;
 		}
 
-		//Reset do dicionario se codeSize for maior que 3 * 2^(minCodeSize + 1) e adicionar CC ao output
+		int reqBits = codeSize;
+
+		// Reset do dicionario se codeSize for maior que 3 * 2^(minCodeSize + 1) e adicionar CC ao output
 		if( inNum >= maxValue ) {
-			codificationTable = resetAlphabet();
+			// codificationTable = resetAlphabet();
 			codeSize = minCodeSize;
-			//Inserir clear code no output
+			// Inserir clear code no output
 			reqBits = numBits(cc);
 			writeOnOutput(output, output_str, cc);
 
-			return -1 //Sinal para reenviar num apos reset no dicionario
+			return -1; // Sinal para reenviar num apos reset no dicionario
 		}
 
 		reqBits = codeSize;
 
-		//O numero de bits necessario para representar inNum é menor ou igual a codeSize
-		//Enquanto tiver bits para representar
+		// O numero de bits necessario para representar inNum é menor ou igual a codeSize
+		// Enquanto tiver bits para representar
 		while(inNum > 0) {
-			//Bits a adicionar
+			// Bits a adicionar
 			temp = inNum << usedBits;
-			//Preencher byte
+			// Preencher byte
 			toBeInserted = (byte)((temp | toBeInserted) & 0xFF);
-			//Update inNum, contendo os bits nao adicionados
+			// Update inNum, contendo os bits nao adicionados
 			inNum = inNum >> availableBits;
-			//Se o numero de bits a adicionar foi maior ou igual que o numero de bits disponiveis no byte
+			// Se o numero de bits a adicionar foi maior ou igual que o numero de bits disponiveis no byte
 			if(reqBits >= availableBits) {
 				output.write(toBeInserted);
 				output_str = output_str.concat("\n" + numToBitString(toBeInserted));
@@ -294,7 +276,7 @@ public class MyGIFEncoder {
 				}
 			} else reqBits = 0;
 		}
-		//Se ainda o numero fe bits necessario para representar o num for menor que o code size devemos preencher os restantes bits com 0's
+		// Se ainda o numero de bits necessario para representar o num for menor que o code size devemos preencher os restantes bits com 0's
 		while(reqBits > 0) {
 			if(reqBits >= availableBits) {
 				output.write(toBeInserted);
@@ -316,11 +298,11 @@ public class MyGIFEncoder {
 			} else {
 				usedBits += reqBits;
 				availableBits -= reqBits;
-				reqBits = 0;
-				//Se o ultimo byte nao esta preenchido devolver 0 e verificar se vao haver mais numeros
+				// Se o ultimo byte nao esta preenchido devolver 0 e verificar se vao haver mais numeros
 				return 0;
 			}
 		}
+		return 0;
 	}
 
 	private void lzwCodification(OutputStream output) throws IOException {
@@ -337,9 +319,9 @@ public class MyGIFEncoder {
 		String nextColor;
 		String prevColor;
 
-		//valor correspondente ao valor maximo que o code size pode ter -> 3 * 2^(minCodeSize + 1)
+		// Valor correspondente ao valor maximo que o code size pode ter -> 3 * 2^(minCodeSize + 1)
 		maxValue = 3 * nextPower2(minCodeSize);
-		//primeiro codesize sera minCodeSize + 1
+		// Primeiro codesize sera minCodeSize + 1
 		codeSize = minCodeSize+1;
 		// Cria dicionario inicial com CC e EOI, e devolve proximo index livre
 		int availableAlphabetEntry = resetAlphabet();

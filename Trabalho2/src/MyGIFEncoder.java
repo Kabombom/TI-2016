@@ -156,9 +156,9 @@ public class MyGIFEncoder {
 		codificationTable = new Hashtable<Integer, String>();
 
         while(i < colors.length) {
-			fullColor += Byte.toString(colors[i]) + ".";
-			fullColor += Byte.toString(colors[i+1]) + ".";
-			fullColor += Byte.toString(colors[i+2]);
+			fullColor += Integer.toString( fixByte(colors[i]) ) + ".";
+			fullColor += Integer.toString( fixByte(colors[i+1]) ) + ".";
+			fullColor += Integer.toString( fixByte(colors[i+2]) );
             codificationTable.put(i/3, fullColor);
 			fullColor = "";
 			i+=3;
@@ -318,7 +318,7 @@ public class MyGIFEncoder {
 	private void debug(StringBuilder output_str, byte n) {
         System.out.println("BYTE SENT");
         System.out.println(Integer.toHexString( fixByte(n) ) + " " + Integer.toBinaryString( fixByte(n) ) );
-        output_str.append(Integer.toHexString( fixByte(n) ) + " " + Integer.toBinaryString(n));
+        output_str.append("\n" + Integer.toHexString( fixByte(n) ) + " " + Integer.toBinaryString( fixByte(n) ) );
     }
 
 	//O byte apenas suporta numeros de 0 a 128 e de -127 a 0
@@ -328,6 +328,8 @@ public class MyGIFEncoder {
 		if( (int)n < 0) {
             fixedByte = 256 + (int)n;
         } else fixedByte = (int)n;
+
+		return fixedByte;
 	}
 
 	private void lzwCodification(OutputStream output) throws IOException {
@@ -438,12 +440,12 @@ public class MyGIFEncoder {
                 /*else {
                     System.out.println("Color found");
                 }*/
-                pauseProg(1);
+                //pauseProg(1);
             }
             ++i;
         }
-		// System.out.println("TEST STRING: \n" + output_str);
-		// System.out.print(codificationTable);
+		System.out.println("TEST STRING: \n" + output_str);
+		//System.out.print(codificationTable);
 	}
 
 	// Funcao para escrever imagem no formato GIF, versao 87a

@@ -31,8 +31,6 @@ public class MyGIFEncoder {
 	private byte toBeInserted;
 	// Code Size
 	private int codeSize;
-	// Valor maximo que o code size pode ter -> 3 * 2^ (minCodeSize + 1)
-	private int maxValue;
 	// SubBlockSize
 	private byte subBlockSize = (byte)0xFF;
 	// For byte to int convertion
@@ -238,8 +236,8 @@ public class MyGIFEncoder {
 			codeSize +=1;
 		}
 
-		//Reset do dicionario se codeSize for maior que 3 * 2^(minCodeSize + 1) e adicionar CC ao output
-		if(inNum >= maxValue) {
+		//Reset do dicionario se codeSize tiver que ser superior a 12 bits
+		if(numBits(inNum) > 12) {
 			codeSize = minCodeSize+1;
 			writeOnOutput(output, output_str, cc);
 			//Sinal para reenviar num apos reset no dicionario
@@ -258,7 +256,8 @@ public class MyGIFEncoder {
 			// Se o numero de bits a adicionar foi maior ou igual que o numero de bits disponiveis no byte
 			if(reqBits >= availableBits) {
 				output.write(toBeInserted);
-                debug(output_str);
+
+                debug(output_str, toBeInserted);
 
 				toBeInserted = (byte)0x00;
 
@@ -270,7 +269,7 @@ public class MyGIFEncoder {
 					// Se ainda tenho bits para adicionar
 					output.write(subBlockSize);
 
-                    debug(output_str);
+                    debug(output_str, subBlockSize);
 
 					availableSubBlock = 256;
 				} else if(availableSubBlock == 0 && reqBits == 0) {
@@ -287,7 +286,9 @@ public class MyGIFEncoder {
 		while(reqBits > 0) {
 			if(reqBits >= availableBits) {
 				output.write(toBeInserted);
-                debug(output_str);
+
+                debug(output_str, toBeInserted);
+
 				toBeInserted = (byte)0x00;
 				reqBits -= availableBits;
 				availableBits = 8;
@@ -296,7 +297,9 @@ public class MyGIFEncoder {
 				if(availableSubBlock == 0 && reqBits > 0) {
 					// Se ainda ha bits para adicionar e o sub bloc acabou insere-se o block size
 					output.write(subBlockSize);
-                    debug(output_str);
+
+                    debug(output_str, subBlockSize);
+
 					availableSubBlock = 256;
 				}
 				else if(availableSubBlock == 0 && reqBits == 0) // O byte foi preenchido e inserido, sub block esgotado
@@ -312,14 +315,20 @@ public class MyGIFEncoder {
 		return 0;
 	}
 
-	private void debug(StringBuilder output_str) {
+	private void debug(StringBuilder output_str, byte n) {
         System.out.println("BYTE SENT");
-        if( (int)subBlockSize < 0) {
-            fixedByte = 256 + (int)subBlockSize;
-        } else fixedByte = (int)subBlockSize;
-        System.out.println(Integer.toHexString(fixedByte) + " " + Integer.toBinaryString(fixedByte));
-        output_str.append(Integer.toHexString(fixedByte) + " " + Integer.toBinaryString(fixedByte));
+        System.out.println(Integer.toHexString( fixByte(n) ) + " " + Integer.toBinaryString( fixByte(n) ) );
+        output_str.append(Integer.toHexString( fixByte(n) ) + " " + Integer.toBinaryString(n));
     }
+
+	//O byte apenas suporta numeros de 0 a 128 e de -127 a 0
+	private int fixByte(byte n) {
+		int fixedByte;
+
+		if( (int)n < 0) {
+            fixedByte = 256 + (int)n;
+        } else fixedByte = (int)n;
+	}
 
 	private void lzwCodification(OutputStream output) throws IOException {
 		// Escrever blocos com 256 bytes no maximo
@@ -329,8 +338,6 @@ public class MyGIFEncoder {
 
 		StringBuilder output_str = new StringBuilder();
 
-		// Valor correspondente ao valor maximo que o code size pode ter -> 3 * 2^(minCodeSize + 1)
-		maxValue = 3 * ((int)Math.pow(2, minCodeSize + 1));
 		// Primeiro codesize sera minCodeSize + 1
 		codeSize = minCodeSize + 1;
 		// Cria dicionario inicial com CC e EOI, e devolve proximo index livre
@@ -338,7 +345,7 @@ public class MyGIFEncoder {
 		// Inserir block size - 256 -> admitimos que nao vamos adicionar uma imagem vazia
 		output.write(subBlockSize);
 
-        debug(output_str);
+        debug(output_str, subBlockSize);
 
 		// Inserir clear code (pode-se ignorar o return da Funcao porque se referiu em cima que o sub block size ia ser 256)
 		writeOnOutput(output, output_str, cc);
@@ -420,8 +427,9 @@ public class MyGIFEncoder {
 								// TODO
 							} else { //Se ainda tiver numeros para adicionar
 								availableSubBlock = 256;
-								output.write((byte)0xFF);
-                                debug(output_str);
+								output.write(subBlockSize);
+
+                                debug(output_str, subBlockSize);
 							}
 							break;
 					}

@@ -250,6 +250,7 @@ public class MyGIFEncoder {
 		while(inNum > 0) {
 			// Bits a adicionar
 			// Preencher byte
+			temp = (byte)((inNum << usedBits) & 0xFF);
 			toBeInserted = (byte)((temp | toBeInserted) & 0xFF);
 			// Update inNum, contendo os bits nao adicionados
 			inNum = (byte)((inNum >> availableBits) & 0xFF);

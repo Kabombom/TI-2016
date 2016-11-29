@@ -141,12 +141,13 @@ public class MyGIFEncoder {
 
 		codificationTable = new Hashtable<Integer, String>();
 
-        while(i < colors.length) {
-			fullColor += Integer.toString( fixByte(colors[i]) ) + ".";
+    	while(i < colors.length) {
+			/*fullColor += Integer.toString( fixByte(colors[i]) ) + ".";
 			fullColor += Integer.toString( fixByte(colors[i+1]) ) + ".";
 			fullColor += Integer.toString( fixByte(colors[i+2]) );
             codificationTable.put(i/3, fullColor);
-			fullColor = "";
+			fullColor = "";*/
+			codificationTable.put(i/3, Integer.toString(i/3) );
 			i+=3;
         }
 
@@ -216,7 +217,7 @@ public class MyGIFEncoder {
 		}
 
 		reqBits = codeSize;
-		System.out.println("inNum: " + inNum + " codeSize: " + codeSize);
+		System.out.println("codeSize: " + codeSize);
 
 		/* O numero de bits necessario para representar inNum é menor ou igual a codeSize
 		Enquanto tiver bits para representar */
@@ -225,12 +226,12 @@ public class MyGIFEncoder {
 			// Preencher byte
 			temp = (byte)((inNum << usedBits) & 0xFF);
 			toBeInserted = (byte)((temp | toBeInserted) & 0xFF);
-			inNum = (inNum >> availableBits);    // Update inNum, contendo os bits nao adicionados
 			// Se o numero de bits a adicionar foi maior ou igual que o numero de bits disponiveis no byte
 			if(reqBits >= availableBits) {
-				System.out.println("Byte inserido. " + availableBits + " bits inseridos");
+				System.out.println("Primeiros " + availableBits + " bits de " + Integer.toBinaryString(inNum) + " foram inseridos no byte anterior");
+				inNum = (inNum >> availableBits);    // Update inNum, contendo os bits nao adicionados
 				output.write(toBeInserted);
-                //debug(output_str, toBeInserted);
+				System.out.println("Enviar " + fixByte(toBeInserted) + " " + Integer.toBinaryString(fixByte(toBeInserted)));
 				toBeInserted = (byte)0x00;
 				reqBits -= availableBits;
 				availableBits = 8;
@@ -250,6 +251,8 @@ public class MyGIFEncoder {
 					return 1;
 				}
 			} else { //se o numero de bits necessario para representar o num for menor que o numero de availableBits, inserir numero
+				System.out.println("Primeiros " + reqBits + " bits de " + Integer.toBinaryString(inNum) + " foram inseridos no byte");
+				inNum = (inNum >> availableBits);    // Update inNum, contendo os bits nao adicionados
 				temp = (byte)((inNum << usedBits) & 0xFF);
 				toBeInserted = (byte)((temp | toBeInserted) & 0xFF);
 				inNum = inNum >> codeSize;
@@ -262,8 +265,9 @@ public class MyGIFEncoder {
 		// Se o numero de bits necessarios para representar o num for menor que o code size devemos preencher os restantes bits com 0's
 		while(reqBits > 0) {
             if(reqBits >= availableBits) {
-				System.out.println("Byte inserido. foram inseridos " + availableBits + " 0's");
+				System.out.println(Integer.toBinaryString(fixByte(toBeInserted)) + " " + toBeInserted + " Byte inserido. foram inseridos " + availableBits + " 0's");
 				output.write(toBeInserted);
+				System.out.println("Enviar " + fixByte(toBeInserted) + " " + Integer.toBinaryString(fixByte(toBeInserted)));
 				toBeInserted = (byte)0x00;
 				reqBits -= availableBits;
 				availableBits = 8;
@@ -284,11 +288,12 @@ public class MyGIFEncoder {
 			else { // Ultimo byte nao foi preenchido nem inserido
 				System.out.println("Foram inseridos " + reqBits + " 0's");
 				availableBits -= reqBits;
+				usedBits = 8 - availableBits;
 				reqBits = 0;
 			}
 		}
 
-		System.out.println("numero " + num + " inserido. availableBits: " + availableBits + " toBeInserted: " + Integer.toBinaryString(fixByte(toBeInserted)));
+		System.out.println("usedBits: " + usedBits + " availableBits: " + availableBits + " toBeInserted: " + Integer.toBinaryString(fixByte(toBeInserted)));
 		return 0; // Ultimo byte nao preenchido e nao inserido
 	}
 
@@ -336,25 +341,25 @@ public class MyGIFEncoder {
 		 		se nao, inserir sub block size, availableSubBlock= (sub block size), inserir EOI e preencher com 0's
 		 		se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar */
 
-	    while(i < 2) {
+	    while(i < 5) {
 	        currentPixel = pixels[i];
 	        //percent = (((float)i + 1) / pixels.length) * 100;
 	        //System.out.println(percent + "% Completed i = " + i + " max = " +  pixels.length);
 	        //System.out.println("\ni = " + i + " Searching for key " + currentPixel + " in dictionary");
 
 	        color = codificationTable.get(currentPixel);
-	        //System.out.println("Color: " + color);
+	        System.out.println("Color: " + color);
 	        cat = 0;
 			prevIndex =	currentPixel;
+			prevColor = color;
 
 	        while(i + cat + 1 != pixels.length) {
 	            cat += 1;
 	            nextPixel = pixels[i + cat];
-				prevColor = codificationTable.get(prevIndex);
 				//System.out.println("prevColor: " + prevColor);
 	            nextColor = codificationTable.get(nextPixel);
 	            color = color.concat("|" + nextColor);
-	            // System.out.println("Color from concat: " + color );
+	            System.out.println("Color from concat: " + color );
 	            // System.out.println("Searching for color " + color + " in dictionary");
 
 	            if(!codificationTable.contains(color)) {
@@ -398,12 +403,15 @@ public class MyGIFEncoder {
 					}
 	                break;
 	            } else {
+					prevColor = color;
+					//PROB HERE
 					prevIndex = keyOfValue(codificationTable, prevColor);
-	                //System.out.println("Color found. latest index: " + prevIndex);
+	                System.out.println("Color " + prevColor + " found. latest index: " + prevIndex);
 	            }
 	        }
 			++i;
 		}
+		System.out.println(codificationTable.toString());
 	}
 
 	// Funcao para escrever imagem no formato GIF, versao 87a

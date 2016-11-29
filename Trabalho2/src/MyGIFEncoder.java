@@ -252,9 +252,9 @@ public class MyGIFEncoder {
 				temp = (byte)((inNum << usedBits) & 0xFF);
 				toBeInserted = (byte)((temp | toBeInserted) & 0xFF);
 				inNum = inNum >> codeSize;
-				reqBits -= codeSize;
-				usedBits += codeSize;
-				availableBits -= codeSize;
+				usedBits += reqBits;
+				availableBits -= reqBits;
+				reqBits = 0;
 			}
 		}
 
@@ -337,7 +337,7 @@ public class MyGIFEncoder {
 		 		se nao, inserir sub block size, availableSubBlock= (sub block size), inserir EOI e preencher com 0's
 		 		se sim, inserir sub block size e availableSubBlock = (sub block size) ao output e continuar */
 
-	    while(i < 5) {
+	    while(i < 4) {
 	        currentPixel = pixels[i];
 	        //percent = (((float)i + 1) / pixels.length) * 100;
 	        //System.out.println(percent + "% Completed i = " + i + " max = " +  pixels.length);

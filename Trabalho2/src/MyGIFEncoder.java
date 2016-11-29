@@ -161,19 +161,15 @@ public class MyGIFEncoder {
         return eoi + 1;
     }
 
-	private int keyOfValue(Hashtable hash, Object value) {
-		Enumeration keys = hash.keys();
- 		//System.out.println("VALUE " + value.toString());
- 		int i = 0;
- 		while(keys.hasMoreElements()) {
- 			String valueFromHash = (String) hash.get(keys.nextElement());
- 			//System.out.println("Value from Hash " + valueFromHash);
- 			if (valueFromHash.equals(value.toString())) {
- 				return i;
- 			}
- 			i++;
- 		}
-		return 0;
+	private int keyOfValue(Hashtable hash, String value) {
+		Enumeration e = hash.keys();
+	    while (e.hasMoreElements()) {
+			int key = (int) e.nextElement();
+			if(hash.get(key).equals(value)) {
+				return (int)key;
+			}
+	    }
+		return -1;
 	}
 
 	private void pauseProg(int sec) {
@@ -404,7 +400,6 @@ public class MyGIFEncoder {
 	                break;
 	            } else {
 					prevColor = color;
-					//PROB HERE
 					prevIndex = keyOfValue(codificationTable, prevColor);
 	                System.out.println("Color " + prevColor + " found. latest index: " + prevIndex);
 	            }
@@ -509,11 +504,5 @@ public class MyGIFEncoder {
 		}
 
 		output.write(minCodeSize);
-	}
-
-	public void printColorArray() {
-		for(int e = 0; e + 2 < colors.length; e += 3) {
-            System.out.print(colors[e] + " " + colors[e+1] + " " + colors[e+2] + "\n");
-		}
 	}
 }

@@ -138,17 +138,11 @@ public class MyGIFEncoder {
 	}
 
 	public int resetAlphabet() {
-		String fullColor = "";
 		int i = 0;
 
 		codificationTable = new Hashtable<Integer, String>();
 
     	while(i < colors.length) {
-			/*fullColor += Integer.toString( fixByte(colors[i]) ) + ".";
-			fullColor += Integer.toString( fixByte(colors[i+1]) ) + ".";
-			fullColor += Integer.toString( fixByte(colors[i+2]) );
-            codificationTable.put(i/3, fullColor);
-			fullColor = "";*/
 			codificationTable.put(i/3, Integer.toString(i/3) );
 			i += 3;
         }
@@ -189,7 +183,6 @@ public class MyGIFEncoder {
 	// Escreve numero no output
 
 	/* Status
-	-1 -> reenviar numero antes de concatenacoes
 	 0 -> (byte nao preenchido) verificar se há mais numeros para serem inseridos
 			 se sim, continuar
 			se nao, inserir eoi e preencher sub bloco com 0's
@@ -327,7 +320,6 @@ public class MyGIFEncoder {
         String color;
         String nextColor;
         int prevIndex;
-        float percent;
 		int freeze = 0;
 
         codeSize = minCodeSize + 1;
@@ -342,7 +334,7 @@ public class MyGIFEncoder {
         // Inserir clear code (pode-se ignorar o return da funcao porque se referiu em cima que o sub block size ia ser 255)
     	writeOnOutput(output, cc);
 
-        /* -1 -> reenviar numero antes de concatenacoes
+        /*
 		 0 -> (byte nao preenchido) verificar se há mais numeros para serem inseridos
 		 		se sim, continuar
 				se nao, inserir eoi e preencher sub bloco com 0's
@@ -356,12 +348,16 @@ public class MyGIFEncoder {
 		*/
 
 	    while(i < pixels.length) {
+			if(availableAlphabetEntry + 1 == 4096) {
+				freeze=1;
+				//codeSize = minCodeSize + 1;
+				//writeOnOutput(output, cc);
+				//availableAlphabetEntry = resetAlphabet();
+			}
+
 	        currentPixel = pixels[i];
-	        percent = (((float)i + 1) / pixels.length) * 100;
-	        //System.out.println(percent + "% Completed i = " + i + " max = " +  pixels.length);
 
 	        color = codificationTable.get(currentPixel);
-			System.out.println("Cycle start, starting pixel: " +  color + " [at index " + i + "]");
 
 	        cat = 0;
 			prevIndex =	currentPixel;
@@ -373,20 +369,10 @@ public class MyGIFEncoder {
 	            color = color.concat("|" + nextColor);
 
 	            if(!codificationTable.contains(color)) {
-
-					System.out.println("Testing " + color + "... Not found!");
-					if(availableAlphabetEntry + 1 == 4096) {
-						freeze=1;
-						//codeSize = minCodeSize + 1;
-						//writeOnOutput(output, cc);
-						//availableAlphabetEntry = resetAlphabet();
-					}
 					if(freeze==0) {
 						codificationTable.put(availableAlphabetEntry, color);
-						System.out.println("Cycle ended, added " + color + " to the code table at index " + availableAlphabetEntry);
 						availableAlphabetEntry += 1;
 					}
-					System.out.println("table size: " + codificationTable.size() + " max Value: " + maxValue);
 					if (codificationTable.size() - 2 == maxValue) {
 						codeSize++;
 						maxValue = (int) Math.pow(2, codeSize);
@@ -400,13 +386,6 @@ public class MyGIFEncoder {
 	        }
 
 			switch(writeOnOutput(output, prevIndex)) {
-				case -1:    // Reset no dicionario
-					System.out.println("RESETING ALPHABET");
-					//freeze = 1;
-					//availableAlphabetEntry = resetAlphabet();
-					//--i;    // Voltar a enviar numero antes de concatenacoes
-					break;
-
 				case 0: // Numero inserido
 					if(i + 1 == pixels.length) {	//Se nao houver mais numeros
 						switch(writeOnOutput(output, eoi)) { // Inserir EOI e atualizar byte
@@ -453,9 +432,7 @@ public class MyGIFEncoder {
 			}
 			//pauseProg(1);
 			i = i + cat;
-			System.out.println("Added code " + prevIndex + " to the stream\n");
 		}
-		//System.out.println(codificationTable.toString());
 	}
 
 	public void writeZeros(OutputStream output) throws IOException {

@@ -4,10 +4,6 @@ import java.awt.image.*;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
-// Para o LZW
-// Colors e o alfabeto
-// Pixels a mensagem
-
 public class MyGIFEncoder {
 	private short width, height; // largura e altura da imagem
 	private int numColors; // numero de cores distintas na imagem
@@ -24,7 +20,6 @@ public class MyGIFEncoder {
 	private byte subBlockSize = (byte)0xFF;
     private Hashtable<Integer, String> codificationTable; // HashTable for LZW algorithm
 	private int availableAlphabetEntry;
-	private int maxValue;
 
 	// Construtor e funcoes auxiliares (para obtencao da imagem indexada)
 	public MyGIFEncoder(Image image) throws InterruptedException, AWTException {
@@ -180,17 +175,16 @@ public class MyGIFEncoder {
 		}
 	}
 
-	// Escreve numero no output
 
 	/* Status
 	 0 -> (byte nao preenchido) verificar se há mais numeros para serem inseridos
 			 se sim, continuar
 			se nao, inserir eoi e preencher sub bloco com 0's
 	 1 -> (byte preenchido) verificar se vao ser inseridos mais numeros
-			se sim, verificar se estou no fim do sub bloco
+			se sim, verificar se e o fim do sub bloco
 				se sim, inserir sub block size
 				se nao, continuar
-			se nao, verificar se estou bo fim do sub bloco
+			se nao, verificar se e o fim do sub bloco
 				se sim, inserir sub block size, inserir eoi, e preencher com 0's
 				se nao, inseir eoi e preencher com 0's
 	*/
@@ -312,6 +306,10 @@ public class MyGIFEncoder {
 		// O primeiro bloco tem, depois do block size, o clear code
 		// Escrever end of information depois de todos os blocos
 
+		// Para o LZW
+		// Colors e o alfabeto
+		// Pixels a mensagem
+
         int cat; // Variavel usada para indice de concatenaçoes
         int i = 0;
         int currentPixel;
@@ -323,7 +321,7 @@ public class MyGIFEncoder {
 		int freeze = 0;
 
         codeSize = minCodeSize + 1;
-		maxValue = (int) Math.pow(2, codeSize);
+		int maxValue = (int) Math.pow(2, codeSize);
 
         // Cria dicionario inicial com CC e EOI, e devolve proximo index livre
         int availableAlphabetEntry = resetAlphabet();
@@ -333,19 +331,6 @@ public class MyGIFEncoder {
 
         // Inserir clear code (pode-se ignorar o return da funcao porque se referiu em cima que o sub block size ia ser 255)
     	writeOnOutput(output, cc);
-
-        /*
-		 0 -> (byte nao preenchido) verificar se há mais numeros para serem inseridos
-		 		se sim, continuar
-				se nao, inserir eoi e preencher sub bloco com 0's
-		 1 -> (byte preenchido) verificar se vao ser inseridos mais numeros
-				se sim, verificar se estou no fim do sub bloco
-					se sim, inserir sub block size
-					se nao, continuar
-				se nao, verificar se estou bo fim do sub bloco
-					se sim, inserir sub block size, inserir eoi, e preencher com 0's
-					se nao, inseir eoi e preencher com 0's
-		*/
 
 	    while(i < pixels.length) {
 	        currentPixel = pixels[i];
@@ -387,34 +372,33 @@ public class MyGIFEncoder {
 
 			switch(writeOnOutput(output, prevIndex)) {
 				case 0: // Numero inserido
-					if(i + 1 == pixels.length) {	//Se nao houver mais numeros
-						switch(writeOnOutput(output, eoi)) { // Inserir EOI e atualizar byte
+					if(i + 1 == pixels.length) { // Se nao houver mais numeros
+						switch (writeOnOutput(output, eoi)) { // Inserir EOI e atualizar byte
 							case 0: // Ultimo byte nao preenchido
 								codeSize = availableBits;
 								writeOnOutput(output, 0); //Podemos ignorar returns pois como codeSize é igual ao availableBits, o byte será preenchido com 0's
 								writeZeros(output);
 								return;
 							case 1: // ultimo byte foi preenchiddo
-								if(availableSubBlock != 0) { // Verificar se é o final do sub bloco
+								if (availableSubBlock != 0) { // Verificar se é o final do sub bloco
 									writeZeros(output);
 								}
 								return; //Sair da funçao e inserir block terminator e trailer
 						}
-					}
-					// Se houver mais pixeis continuar
+					} // Se houver mais pixeis continuar
 
 				case 1: // byte preenchido
 					if(i + 1 == pixels.length) { // Se nao vao ser inseridos mais numeros
-						if(availableSubBlock == 0) {	// Se estou no fim do bloco
+						if(availableSubBlock == 0) {	// Se e no fim do bloco
 							output.write(subBlockSize);
 							availableSubBlock = 255;
 						}
 
 						System.out.println("EIO");
-						switch(writeOnOutput(output, eoi)) { //Escrever eoi e atualizar byte
+						switch(writeOnOutput(output, eoi)) { // Escrever eoi e atualizar byte
 							case 0: // byte nao preenchido
 								codeSize = availableBits;
-								writeOnOutput(output, 0); 	// Podemos ignorar returns pois como codeSize é igual ao availableBits, o byte será preenchido com 0's
+								writeOnOutput(output, 0); 	// Pode-se ignorar returns pois como codeSize é igual ao availableBits, o byte será preenchido com 0's
 								writeZeros(output);		// Acaba o bloco com 0s
 								return;
 
@@ -424,7 +408,7 @@ public class MyGIFEncoder {
 						}
 					}
 					else {
-						if(availableSubBlock == 0) {	// Se estou no fim do sub bloco
+						if(availableSubBlock == 0) {	// Se e no fim do sub bloco
 							output.write(subBlockSize);
 							availableSubBlock = 255;
 						}

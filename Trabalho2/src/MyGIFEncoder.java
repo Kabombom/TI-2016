@@ -348,13 +348,6 @@ public class MyGIFEncoder {
 		*/
 
 	    while(i < pixels.length) {
-			if(availableAlphabetEntry + 1 == 4096) {
-				freeze=1;
-				//codeSize = minCodeSize + 1;
-				//writeOnOutput(output, cc);
-				//availableAlphabetEntry = resetAlphabet();
-			}
-
 	        currentPixel = pixels[i];
 
 	        color = codificationTable.get(currentPixel);
@@ -369,15 +362,22 @@ public class MyGIFEncoder {
 	            color = color.concat("|" + nextColor);
 
 	            if(!codificationTable.contains(color)) {
-					if(freeze==0) {
-						codificationTable.put(availableAlphabetEntry, color);
-						availableAlphabetEntry += 1;
-					}
-					if (codificationTable.size() - 2 == maxValue) {
-						codeSize++;
-						maxValue = (int) Math.pow(2, codeSize);
-					}
-	                break;
+								if(availableAlphabetEntry == 4096) {
+									freeze=1;
+									//codeSize = minCodeSize + 1;
+									//writeOnOutput(output, cc);
+									//availableAlphabetEntry = resetAlphabet();
+								}
+								if(freeze==0) {
+									codificationTable.put(availableAlphabetEntry, color);
+									availableAlphabetEntry += 1;
+
+									if (availableAlphabetEntry - 2 == maxValue) {
+										codeSize++;
+										maxValue = (int) Math.pow(2, codeSize);
+									}
+								}
+	              break;
 	            }
 	            else {
 					prevColor = color;

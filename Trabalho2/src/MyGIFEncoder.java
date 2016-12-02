@@ -347,20 +347,20 @@ public class MyGIFEncoder {
 	            color = color.concat("|" + nextColor);
 
 	            if(!codificationTable.contains(color)) {
-								if(availableAlphabetEntry == 4096) {
+								if(availableAlphabetEntry >= 4096) {
 									freeze=1;
 									//codeSize = minCodeSize + 1;
 									//writeOnOutput(output, cc);
 									//availableAlphabetEntry = resetAlphabet();
 								}
 								if(freeze==0) {
-									codificationTable.put(availableAlphabetEntry, color);
-									availableAlphabetEntry += 1;
-
-									if (availableAlphabetEntry - 2 == maxValue) {
+									if (availableAlphabetEntry - 1 == maxValue) {
 										codeSize++;
 										maxValue = (int) Math.pow(2, codeSize);
 									}
+
+									codificationTable.put(availableAlphabetEntry, color);
+									availableAlphabetEntry += 1;
 								}
 	              break;
 	            }

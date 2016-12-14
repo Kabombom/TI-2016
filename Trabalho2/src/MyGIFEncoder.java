@@ -192,19 +192,19 @@ public class MyGIFEncoder {
 	public int writeOnOutput(OutputStream output, int num) throws IOException {
 
 		byte temp = (byte)0x00;
-		int inNum = num;
-		int reqBits;
+		int inNum = num; //Numero a ser inserido
+		int reqBits; // Numero de bits necessários
 
 		//System.out.println("num: " + num + " " + Integer.toBinaryString(num));
-		reqBits = codeSize;
+		reqBits = codeSize; // O reqBits é o code dizer no inicio
 		// System.out.println("codeSize: " + codeSize);
 
 		/* O numero de bits necessario para representar inNum é menor ou igual a codeSize
 		Enquanto tiver bits para representar */
 
 		while(inNum > 0) {
-			temp = (byte)((inNum << usedBits) & 0xFF);
-			toBeInserted = (byte)((temp | toBeInserted) & 0xFF);
+			temp = (byte)((inNum << usedBits) & 0xFF); // Se já usámos 2 bits (usedBIts) fazemos shift left de 2 para o inNUm caber no toBeInserted. O 0xFF serve para limpar o inteiro
+			toBeInserted = (byte)((temp | toBeInserted) & 0xFF); // O toBeInserted vai ser concatenado com temp. O 0xFF serve para limpar o inteiro
 
 			// Se o numero de bits a adicionar foi maior ou igual que o numero de bits disponiveis no byte
 			if(reqBits >= availableBits) {
@@ -320,7 +320,9 @@ public class MyGIFEncoder {
         int prevIndex;
 		int freeze = 0;
 
+		// É minCodeSize + 1 por causa do CC e EOI
         codeSize = minCodeSize + 1;
+		// Max Value é o valor máximo da tabela atualmente
 		int maxValue = (int) Math.pow(2, codeSize);
 
         // Cria dicionario inicial com CC e EOI, e devolve proximo index livre
@@ -334,9 +336,7 @@ public class MyGIFEncoder {
 
 	    while(i < pixels.length) {
 	        currentPixel = pixels[i];
-
 	        color = codificationTable.get(currentPixel);
-
 	        cat = 0;
 			prevIndex =	currentPixel;
 
@@ -346,25 +346,35 @@ public class MyGIFEncoder {
 	            nextColor = codificationTable.get(nextPixel);
 	            color = color.concat("|" + nextColor);
 
+                // Se a codification table nao contem a cor
 	            if(!codificationTable.contains(color)) {
-								if(availableAlphabetEntry >= 4096) {
-									freeze=1;
-									//codeSize = minCodeSize + 1;
-									//writeOnOutput(output, cc);
-									//availableAlphabetEntry = resetAlphabet();
-								}
-								if(freeze==0) {
-									if (availableAlphabetEntry - 1 == maxValue) {
-										codeSize++;
-										maxValue = (int) Math.pow(2, codeSize);
-									}
+                    // é uma norma, o tamanho maximo da tabela é 4096
+					if(availableAlphabetEntry >= 4096) {
+						freeze=1;
+						//codeSize = minCodeSize + 1;
+						//writeOnOutput(output, cc);
+						//availableAlphabetEntry = resetAlphabet();
+					}
+					// Se nao rebentámos com o availableAlphabetEntry e o free ainda é 0
+					if(freeze==0) {
 
-									codificationTable.put(availableAlphabetEntry, color);
-									availableAlphabetEntry += 1;
-								}
-	              break;
+                        // availableAlphabetEntry -1 porque é a ultima entrada que foi posta na table
+                        // Ou seja se a ultima availableAlphabetEntry é igual a maxValue aumentamos o codeSize e o
+                        // maxValue é atualizado
+						if (availableAlphabetEntry - 1 == maxValue) {
+							codeSize++;
+							maxValue = (int) Math.pow(2, codeSize);
+						}
+
+						codificationTable.put(availableAlphabetEntry, color);
+						availableAlphabetEntry += 1;
+					}
+					break;
 	            }
 	            else {
+                    // Neste caso
+                    // prevIndex é o ultimo index inserido
+                    // prevColor é a ultima cor inserida
 					prevColor = color;
 					prevIndex = keyOfValue(codificationTable, prevColor);
 	            }

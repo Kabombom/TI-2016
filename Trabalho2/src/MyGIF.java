@@ -17,7 +17,7 @@ public class MyGIF {
 
 		try {
 			// Carregar uma imagem
-			String imName = "./resources/monica.png"; //args[0];
+			String imName = "./resources/monica.png";
 			System.out.println("image name: " + imName);
 			Image image = ImageIO.read(new File(imName));
 
@@ -25,10 +25,11 @@ public class MyGIF {
 			MyGIFEncoder encoder = new MyGIFEncoder(image);
 
 			// Escrever no ficheiro
-			String gifName = "output.gif"; //args[1];
+			String gifName = "./resources/output.gif"; //args[1];
 			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(gifName));
 
-			encoder.write(output); // COMPLETAR ESTA FUNCAO
+			encoder.write(output);
+
 		}
 		catch(IOException e) {
 			System.out.println("Erro no acesso ao ficheiro (input)");
